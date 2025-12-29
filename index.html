@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AURORA TITAN PRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon: #00f2ff; --aurora: #bc13fe; --bg: #030308; --glass: rgba(255,255,255,0.03); }
+        body { background: var(--bg); color: #e0e0e0; font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        aside { width: 280px; background: #080810; border-right: 1px solid rgba(0,242,255,0.1); padding: 30px; display: flex; flex-direction: column; }
+        h1 { font-family: 'Orbitron'; color: var(--neon); font-size: 1.2rem; letter-spacing: 3px; margin-bottom: 40px; text-shadow: 0 0 15px var(--neon); }
+        
+        .stat-card { background: var(--glass); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+        .stat-label { font-size: 10px; color: #666; letter-spacing: 1px; text-transform: uppercase; }
+        .stat-value { font-family: 'Orbitron'; color: var(--aurora); font-size: 1.4rem; }
+
+        select, .btn { width: 100%; padding: 12px; background: #111; border: 1px solid #333; color: white; border-radius: 8px; cursor: pointer; font-family: 'Orbitron'; font-size: 11px; transition: 0.3s; margin-top: 10px; }
+        .btn:hover { border-color: var(--neon); box-shadow: 0 0 10px var(--neon); }
+
+        main { flex: 1; display: flex; flex-direction: column; position: relative; background: radial-gradient(circle at top right, #0d0d1a, #030308); }
+        #chatMessages { flex: 1; overflow-y: auto; padding: 40px; display: flex; flex-direction: column; gap: 20px; }
+        
+        .msg { max-width: 80%; padding: 18px; border-radius: 15px; line-height: 1.6; font-size: 0.95rem; animation: fadeIn 0.4s ease; }
+        .label { font-family: 'Orbitron'; font-size: 10px; font-weight: bold; margin-bottom: 8px; display: block; letter-spacing: 1px; }
+        
+        .user-msg { align-self: flex-end; background: rgba(0,242,255,0.05); border-right: 3px solid var(--neon); }
+        .ai-msg { align-self: flex-start; background: rgba(188,19,254,0.05); border-left: 3px solid var(--aurora); }
+        
+        .bottom-wrap { padding: 20px 40px; background: rgba(8,8,16,0.8); backdrop-filter: blur(10px); }
+        .input-box { background: #111; border: 1px solid #222; border-radius: 15px; padding: 12px 20px; display: flex; align-items: center; gap: 15px; }
+        textarea { flex: 1; background: transparent; border: none; color: white; outline: none; resize: none; font-size: 1rem; }
+        
+        #previewArea { display: none; position: relative; width: 80px; height: 80px; margin-bottom: 15px; }
+        #previewImg { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 1px solid var(--neon); }
+        #removeImg { position: absolute; top: -10px; right: -10px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-weight: bold; font-size: 12px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <aside>
+        <h1>AURORA</h1>
+        <div class="stat-card">
+            <div class="stat-label">Neural Credits</div>
+            <div class="stat-value" id="creditCount">1,250</div>
+        </div>
+        <select id="modelSelector">
+            <option value="google/gemini-2.0-flash-001">Gemini 3.0 Flash</option>
+            <option value="google/gemini-pro-1.5">Gemini 3.0 Pro</option>
+        </select>
+        <button id="uploadBtn" class="btn" style="margin-top:auto;">UPLOAD VISION</button>
+        <input type="file" id="fileInput" style="display:none;" accept="image/*">
+    </aside>
+
+    <main>
+        <div id="chatMessages"></div>
+        <div class="bottom-wrap">
+            <div id="previewArea">
+                <img id="previewImg" src="">
+                <button id="removeImg">×</button>
+            </div>
+            <div class="input-box">
+                <textarea id="userInput" placeholder="Initialize link..." rows="1"></textarea>
+                <button id="sendBtn" class="btn" style="width:80px; margin-top:0;">SEND</button>
+            </div>
+        </div>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
