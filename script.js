@@ -288,6 +288,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
+            // Check if reply exists
+            if (!data.reply) {
+                throw new Error('No response from AI. Please try again.');
+            }
+
             // 3. Render AI Response
             const aiDiv = document.createElement('div');
             aiDiv.className = 'msg ai-msg';
