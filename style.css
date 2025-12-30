@@ -256,6 +256,65 @@ h1.brand-title::before {
     animation: fadeInSlide 0.4s ease-out;
 }
 
+/* --- CODE BLOCKS --- */
+.code-block-wrapper {
+    position: relative;
+    margin: 12px 0;
+    background: #0d1117;
+    border: 1px solid rgba(79, 138, 255, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.code-block-wrapper pre {
+    margin: 0;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #e6edf3;
+}
+
+.code-block-wrapper code {
+    font-family: inherit;
+}
+
+.inline-code {
+    background: rgba(79, 138, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #4f8aff;
+}
+
+.copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(79, 138, 255, 0.15);
+    color: var(--text-primary);
+    border: 1px solid rgba(79, 138, 255, 0.3);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-ui);
+}
+
+.copy-btn:hover {
+    background: rgba(79, 138, 255, 0.25);
+    border-color: rgba(79, 138, 255, 0.5);
+}
+
+.copy-btn.copied {
+    background: rgba(0, 255, 136, 0.2);
+    border-color: rgba(0, 255, 136, 0.5);
+    color: #00ff88;
+}
+
 @keyframes fadeInSlide {
     from {
         opacity: 0;
