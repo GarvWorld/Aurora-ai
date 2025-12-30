@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Server: messages = [sys, ...history, {current_user_msg}]
                     // So we pass 'history' (previous turns) and 'message'/'image_url' (current turn).
 
-                    history: chatHistory.slice(0, -1),
+                    history: chatHistory,
                     message: text,
                     image_url: currentImage,
                     model: modelSelector.value,
