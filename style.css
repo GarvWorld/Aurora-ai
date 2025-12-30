@@ -266,6 +266,23 @@ h1.brand-title::before {
     overflow: hidden;
 }
 
+.code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(79, 138, 255, 0.05);
+    border-bottom: 1px solid rgba(79, 138, 255, 0.15);
+}
+
+.code-lang {
+    font-size: 0.75rem;
+    color: #4f8aff;
+    text-transform: uppercase;
+    font-family: var(--font-ui);
+    font-weight: 600;
+}
+
 .code-block-wrapper pre {
     margin: 0;
     padding: 16px;
@@ -290,15 +307,12 @@ h1.brand-title::before {
 }
 
 .copy-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
     background: rgba(79, 138, 255, 0.15);
     color: var(--text-primary);
     border: 1px solid rgba(79, 138, 255, 0.3);
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 0.75rem;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.7rem;
     cursor: pointer;
     transition: all 0.2s ease;
     font-family: var(--font-ui);
@@ -370,6 +384,49 @@ textarea {
     outline: none;
     font-family: var(--font-ui);
     font-size: 1rem;
+}
+
+/* Voice Button */
+.voice-btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    flex: none;
+    border-radius: 50%;
+    border: none;
+    background: rgba(79, 138, 255, 0.1);
+    color: #4f8aff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 1.2rem;
+}
+
+.voice-btn:hover {
+    background: rgba(79, 138, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.voice-btn.listening {
+    background: rgba(255, 68, 68, 0.2);
+    color: #ff4444;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4);
+    }
+
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(255, 68, 68, 0);
+    }
 }
 
 #sendBtn {
