@@ -158,14 +158,16 @@ h1.brand-title::before {
 #chatMessages {
     flex: 1;
     overflow-y: auto;
-    padding: 40px;
-    padding-bottom: 120px;
+    padding: 50px;
+    padding-bottom: 140px;
     /* Space for floating input */
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 40px;
+    /* More breathable */
     scroll-behavior: smooth;
-    max-width: 900px;
+    max-width: 1000px;
+    /* Wider reading area */
     margin: 0 auto;
     width: 100%;
 }
@@ -245,14 +247,23 @@ textarea {
 }
 
 #sendBtn {
-    width: 40px;
-    height: 40px;
+    width: 40px !important;
+    height: 40px !important;
+    flex: none;
+    /* Prevent flex growth */
     border-radius: 50%;
     padding: 0;
+    min-width: 40px;
+    /* Safety */
     background: var(--text-primary);
     color: var(--bg-deep);
     font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
+
 
 #sendBtn:hover {
     transform: scale(1.1);
