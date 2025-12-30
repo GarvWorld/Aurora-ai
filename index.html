@@ -79,6 +79,9 @@
                 </div>
 
                 <div class="input-wrapper">
+                    <button id="voiceBtn" class="voice-btn" title="Voice Input">
+                        <ion-icon name="mic-outline"></ion-icon>
+                    </button>
                     <textarea id="userInput" placeholder="Message Aurora..." rows="1"></textarea>
                     <button id="sendBtn" class="mono-btn primary">
                         <ion-icon name="arrow-up-outline"></ion-icon>
@@ -122,6 +125,21 @@
                         style="background:none; border:none; width:40px; height:40px; cursor:pointer;">
                     <span style="font-size:0.8rem; color:#888;">Tap to customize UI color</span>
                 </div>
+            </div>
+
+            <div class="setting-group">
+                <label class="setting-label">Voice Output</label>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.85rem; color: #ddd;">Read responses aloud</span>
+                    <input type="checkbox" id="voiceOutputToggle" style="accent-color: #4f8aff; transform: scale(1.2);">
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <label class="setting-label">Voice Type</label>
+                <select id="voiceSelect" class="setting-input">
+                    <option value="">Default</option>
+                </select>
             </div>
 
             <button id="saveSettingsBtn" class="mono-btn primary" style="margin-top:10px;">Save Changes</button>
