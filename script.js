@@ -20,12 +20,142 @@ document.addEventListener('DOMContentLoaded', () => {
     const tempSlider = document.getElementById('tempSlider');
     const tempValue = document.getElementById('tempValue');
     const accentPicker = document.getElementById('accentPicker');
+    const voiceBtn = document.getElementById('voiceBtn');
+    const voiceOutputToggle = document.getElementById('voiceOutputToggle');
+    const voiceSelect = document.getElementById('voiceSelect');
 
     // Configuration State
     let config = {
         systemPrompt: "",
-        temperature: 0.7
+        temperature: 0.7,
+        voiceOutputEnabled: false,
+        selectedVoice: null
     };
+
+    // Voice Recognition Setup
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let isListening = false;
+
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+    }
+
+    // Text-to-Speech Setup
+    let speechSynthesis = window.speechSynthesis;
+    let voices = [];
+
+    // Load available voices
+    function loadVoices() {
+        voices = speechSynthesis.getVoices();
+        voiceSelect.innerHTML = '<option value="">Default</option>';
+
+        // Filter English voices and categorize
+        const englishVoices = voices.filter(v => v.lang.startsWith('en'));
+        const femaleVoices = englishVoices.filter(v => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('woman'));
+        const maleVoices = englishVoices.filter(v => v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('man'));
+        const otherVoices = englishVoices.filter(v => !femaleVoices.includes(v) && !maleVoices.includes(v));
+
+        if (femaleVoices.length > 0) {
+            const group = document.createElement('optgroup');
+            group.label = 'Female Voices';
+            femaleVoices.forEach(voice => {
+                const option = document.createElement('option');
+                option.value = voice.name;
+                option.textContent = voice.name;
+                group.appendChild(option);
+            });
+            voiceSelect.appendChild(group);
+        }
+
+        if (maleVoices.length > 0) {
+            const group = document.createElement('optgroup');
+            group.label = 'Male Voices';
+            maleVoices.forEach(voice => {
+                const option = document.createElement('option');
+                option.value = voice.name;
+                option.textContent = voice.name;
+                group.appendChild(option);
+            });
+            voiceSelect.appendChild(group);
+        }
+
+        if (otherVoices.length > 0) {
+            const group = document.createElement('optgroup');
+            group.label = 'Other Voices';
+            otherVoices.forEach(voice => {
+                const option = document.createElement('option');
+                option.value = voice.name;
+                option.textContent = voice.name;
+                group.appendChild(option);
+            });
+            voiceSelect.appendChild(group);
+        }
+    }
+
+    // Load voices on page load and when they change
+    loadVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    // Voice Input Handler
+    if (voiceBtn && recognition) {
+        voiceBtn.onclick = () => {
+            if (isListening) {
+                recognition.stop();
+                isListening = false;
+                voiceBtn.classList.remove('listening');
+            } else {
+                recognition.start();
+                isListening = true;
+                voiceBtn.classList.add('listening');
+            }
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            userInput.value = transcript;
+            isListening = false;
+            voiceBtn.classList.remove('listening');
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            isListening = false;
+            voiceBtn.classList.remove('listening');
+        };
+
+        recognition.onend = () => {
+            isListening = false;
+            voiceBtn.classList.remove('listening');
+        };
+    }
+
+    // Text-to-Speech Function
+    function speakText(text) {
+        if (!config.voiceOutputEnabled) return;
+
+        // Stop any ongoing speech
+        speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        // Set selected voice
+        if (config.selectedVoice) {
+            const voice = voices.find(v => v.name === config.selectedVoice);
+            if (voice) utterance.voice = voice;
+        }
+
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+
+        speechSynthesis.speak(utterance);
+    }
 
     // --- Settings Logic ---
     settingsBtn.onclick = () => {
@@ -50,6 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
     saveSettingsBtn.onclick = () => {
         config.systemPrompt = sysPromptInput.value.trim();
         config.temperature = parseFloat(tempSlider.value);
+        config.voiceOutputEnabled = voiceOutputToggle.checked;
+        config.selectedVoice = voiceSelect.value;
         closeModal();
     };
 
@@ -162,10 +294,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Process reply with code block support
             let processedReply = data.reply
-                .replace(/```([\s\S]*?)```/g, (match, code) => {
+                // Handle code blocks with language identifier (```html, ```javascript, etc.)
+                .replace(/```(\w+)?\n?([\s\S]*?)```/g, (match, lang, code) => {
                     const codeId = 'code-' + Math.random().toString(36).substr(2, 9);
+                    const language = lang || 'code';
                     return `<div class="code-block-wrapper">
-                        <button class="copy-btn" onclick="copyCode('${codeId}')">Copy</button>
+                        <div class="code-header">
+                            <span class="code-lang">${language}</span>
+                            <button class="copy-btn" onclick="copyCode('${codeId}')">Copy</button>
+                        </div>
                         <pre id="${codeId}"><code>${code.trim()}</code></pre>
                     </div>`;
                 })
@@ -182,6 +319,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 4. Update History with AI response
             chatHistory.push({ role: 'assistant', content: data.reply });
+
+            // 5. Speak response if voice output is enabled
+            speakText(data.reply);
 
         } catch (err) {
             const errDiv = document.createElement('div');
