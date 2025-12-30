@@ -87,7 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if ((!text && !selectedImage) || isProcessing) return;
 
         isProcessing = true;
-        sendBtn.innerText = "BUSY";
+        sendBtn.style.opacity = "0.5";
+        sendBtn.style.cursor = "not-allowed";
 
         // 1. Render User Message immediately
         const userDiv = document.createElement('div');
@@ -176,7 +177,8 @@ document.addEventListener('DOMContentLoaded', () => {
             chatWindow.appendChild(errDiv);
         } finally {
             isProcessing = false;
-            sendBtn.innerText = "SEND";
+            sendBtn.style.opacity = "1";
+            sendBtn.style.cursor = "pointer";
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
     }
