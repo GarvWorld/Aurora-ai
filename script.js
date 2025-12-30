@@ -159,8 +159,21 @@ document.addEventListener('DOMContentLoaded', () => {
             // 3. Render AI Response
             const aiDiv = document.createElement('div');
             aiDiv.className = 'msg ai-msg';
-            const formattedReply = data.reply.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>'); // Basic Markdown
-            aiDiv.innerHTML = `<span class="label">AURORA</span>${formattedReply}`;
+
+            // Process reply with code block support
+            let processedReply = data.reply
+                .replace(/```([\s\S]*?)```/g, (match, code) => {
+                    const codeId = 'code-' + Math.random().toString(36).substr(2, 9);
+                    return `<div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyCode('${codeId}')">Copy</button>
+                        <pre id="${codeId}"><code>${code.trim()}</code></pre>
+                    </div>`;
+                })
+                .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+
+            aiDiv.innerHTML = `<span class="label">AURORA</span>${processedReply}`;
             chatWindow.appendChild(aiDiv);
 
             // Update Credits
@@ -191,3 +204,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 });
+
+// Global copy function for code blocks
+window.copyCode = function (codeId) {
+    const codeElement = document.getElementById(codeId);
+    const copyBtn = codeElement.parentElement.querySelector('.copy-btn');
+
+    navigator.clipboard.writeText(codeElement.textContent).then(() => {
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = 'Copied!';
+        copyBtn.classList.add('copied');
+
+        setTimeout(() => {
+            copyBtn.textContent = originalText;
+            copyBtn.classList.remove('copied');
+        }, 2000);
+    });
+};
