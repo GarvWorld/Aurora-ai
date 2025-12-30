@@ -315,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 .replace(/\n/g, '<br>')
                 .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
 
-            aiDiv.innerHTML = `<span class="label">AURORA</span>${processedReply}`;
+            aiDiv.innerHTML = `<span class="label">JARVIS</span>${processedReply}`;
             chatWindow.appendChild(aiDiv);
 
             // Update Credits
