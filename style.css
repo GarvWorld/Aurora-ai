@@ -1,10 +1,10 @@
 :root {
-    /* Gemini 3.0 Pro Palette */
-    --bg-deep: #0b0f19;
-    --bg-panel: #13161f;
-    --surface: #1e2330;
-    --text-primary: #e3e3e3;
-    --text-secondary: #9aa0a6;
+    /* Gemini 3.0 Pro Palette - Enhanced */
+    --bg-deep: #0a0e17;
+    --bg-panel: #12151e;
+    --surface: #1a1e2b;
+    --text-primary: #f0f0f0;
+    --text-secondary: #a0a6b0;
 
     --accent-primary: #4f8aff;
     /* Electric Blue */
@@ -190,17 +190,37 @@ h1.brand-title::before {
 
 .user-msg {
     align-self: flex-end;
-    background: var(--surface);
-    padding: 15px 20px;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 var(--radius-lg);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: linear-gradient(135deg, rgba(79, 138, 255, 0.08), rgba(79, 138, 255, 0.04));
+    padding: 16px 22px;
+    border-radius: var(--radius-lg) var(--radius-lg) 4px var(--radius-lg);
+    border: 1px solid rgba(79, 138, 255, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.user-msg:hover {
+    border-color: rgba(79, 138, 255, 0.25);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Hide label for cleaner look */
 
 .ai-msg {
     align-self: flex-start;
-    padding-left: 0;
+    padding: 16px 0;
+    animation: fadeInSlide 0.4s ease-out;
+}
+
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 
@@ -217,20 +237,22 @@ h1.brand-title::before {
 }
 
 .input-wrapper {
-    background: var(--bg-panel);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, rgba(18, 21, 30, 0.95), rgba(26, 30, 43, 0.95));
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(79, 138, 255, 0.15);
     border-radius: 30px;
-    padding: 8px 15px;
+    padding: 10px 16px;
     display: flex;
     align-items: flex-end;
-    gap: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    transition: box-shadow 0.2s;
+    gap: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(79, 138, 255, 0.05);
+    transition: all 0.3s ease;
 }
 
 .input-wrapper:focus-within {
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 12px 40px rgba(79, 138, 255, 0.15), 0 0 0 1px rgba(79, 138, 255, 0.3);
+    border-color: rgba(79, 138, 255, 0.4);
+    transform: translateY(-2px);
 }
 
 textarea {
@@ -266,7 +288,8 @@ textarea {
 
 
 #sendBtn:hover {
-    transform: scale(1.1);
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(240, 240, 240, 0.3);
 }
 
 /* --- SETTINGS MODAL --- */
