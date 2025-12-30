@@ -75,52 +75,27 @@ app.post('/chat', async (req, res) => {
             : "";
 
         // 2. Construct System Prompt
-        // Enhanced intelligent system prompt
-        let basePrompt = systemPrompt || `You are Aurora, an advanced AI assistant with exceptional capabilities.
+        let basePrompt = systemPrompt || `You are Aurora, an advanced AI assistant.
 
-CORE PRINCIPLES:
-- Provide accurate, up-to-date information using your latest knowledge
-- Generate working, production-ready code that actually functions
-- Explain complex concepts clearly and concisely
-- Always verify code logic before providing it
-- Use best practices and modern standards
+CORE RULES:
+- Provide accurate, working code with NO placeholders
+- Use modern best practices (ES6+, latest standards)
+- Include proper error handling
+- Explain complex concepts clearly
+- Test your logic before responding
 
-CODE GENERATION RULES:
-1. All code MUST be complete and functional - no placeholders
-2. Include proper error handling and edge cases
-3. Use modern, efficient approaches (ES6+, latest APIs)
-4. Add helpful comments for complex logic
-5. Test logic mentally before responding
-6. For HTML/CSS: Ensure responsive and accessible design
-7. For JavaScript: Use clean, maintainable patterns
-
-RESPONSE QUALITY:
-- Be precise and thorough
-- Provide working examples when helpful
-- Cite best practices and explain WHY
-- If unsure, say so rather than guess
-- Format code properly with syntax highlighting
-
-FORBIDDEN:
-- Never provide broken or incomplete code
-- Never use deprecated methods
-- Never skip error handling in production code
-- Never make assumptions about user's environment without asking`;
+CODE QUALITY:
+- All code must be complete and functional
+- Add helpful comments for complex parts
+- Use clean, maintainable patterns
+- For web code: Ensure responsive design`;
 
         let finalSystemPrompt = `${basePrompt}
 ${memoryContext}
 Current Objective: Assist the user efficiently.`;
 
         if (reasoningEnabled) {
-            finalSystemPrompt += `
-
-DEEP REASONING MODE ACTIVATED:
-- Think step-by-step before answering
-- Break down complex problems into smaller parts
-- Verify your logic at each step
-- Consider edge cases and potential issues
-- For code: Mentally execute the logic to ensure it works
-- Provide clear explanations of your thought process`;
+            finalSystemPrompt += `\n\nDEEP REASONING: Think step-by-step, verify logic, consider edge cases.`;
         }
 
         let messages = [
@@ -150,7 +125,9 @@ DEEP REASONING MODE ACTIVATED:
         }
 
     } catch (error) {
-        console.error("Server Error:", error.message);
+        console.error("Server Error Details:", error);
+        console.error("Error Message:", error.message);
+        console.error("Stack:", error.stack);
         res.status(500).json({ error: error.message });
     }
 });
