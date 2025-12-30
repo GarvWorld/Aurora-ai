@@ -85,6 +85,51 @@ h1.brand-title::before {
     box-shadow: 0 0 10px #4f8aff;
 }
 
+/* --- LOGO STYLING --- */
+.logo-container {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-image {
+    width: 42px;
+    height: auto;
+    border-radius: 10px;
+    background: rgba(79, 138, 255, 0.05);
+    padding: 4px;
+    box-shadow: 0 0 20px rgba(79, 138, 255, 0.4), 0 0 40px rgba(79, 138, 255, 0.2);
+    transition: all 0.3s ease;
+    will-change: transform;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+.logo-image:hover {
+    transform: scale(1.05) rotate(2deg);
+    box-shadow: 0 0 30px rgba(79, 138, 255, 0.6), 0 0 60px rgba(79, 138, 255, 0.3);
+}
+
+/* Optimized glow animation using GPU */
+@keyframes logoGlow {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 8px rgba(79, 138, 255, 0.5));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 16px rgba(79, 138, 255, 0.8));
+    }
+}
+
+.logo-container:hover .logo-image {
+    animation: logoGlow 2s ease-in-out infinite;
+}
+
 .control-group {
     display: flex;
     flex-direction: column;
