@@ -75,6 +75,10 @@
                     <button id="uploadBtn" class="mono-btn secondary">
                         <ion-icon name="image-outline" style="font-size: 1.1rem;"></ion-icon> Upload Image
                     </button>
+                    <button id="knowledgeBtn" class="mono-btn secondary"
+                        style="border-color: #00ff88; color: #00ff88; background: rgba(0, 255, 136, 0.05);">
+                        <ion-icon name="library-outline" style="font-size: 1.1rem;"></ion-icon> Knowledge Base
+                    </button>
                     <button id="settingsBtn" class="mono-btn secondary">
                         <ion-icon name="settings-outline" style="font-size: 1.1rem;"></ion-icon> Settings
                     </button>
@@ -168,6 +172,42 @@
             </div>
 
             <button id="saveSettingsBtn" class="mono-btn primary" style="margin-top:10px;">Save Changes</button>
+        </div>
+    </div>
+
+    <!-- KNOWLEDGE BASE MODAL (THE ORACLE) -->
+    <div id="knowledgeModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <span class="modal-title" style="display:flex; align-items:center; gap:10px;">
+                    <ion-icon name="library" style="color:#00ff88;"></ion-icon> THE ORACLE
+                </span>
+                <button class="close-btn" id="closeKnowledge">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
+            </div>
+
+            <div class="setting-group">
+                <label class="setting-label">The Sensory Web (Ingest Data)</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="ingestUrl" class="setting-input" placeholder="https://example.com/article"
+                        style="flex:1;">
+                    <button id="ingestBtn" class="mono-btn primary" style="width:auto; padding:0 20px;">
+                        <ion-icon name="cloud-download-outline"></ion-icon> Absorb
+                    </button>
+                </div>
+                <span id="ingestStatus" style="font-size: 0.75rem; color: #888; margin-top: 5px;"></span>
+            </div>
+
+            <div class="setting-group" style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
+                <label class="setting-label">Verified Knowledge</label>
+                <div id="knowledgeList"
+                    style="flex:1; overflow-y:auto; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; min-height: 200px; display:flex; flex-direction:column; gap:10px;">
+                    <!-- Items will be injected here -->
+                    <div style="text-align:center; color:#555; font-size:0.8rem; padding: 20px;">Knowledge Base Empty
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
