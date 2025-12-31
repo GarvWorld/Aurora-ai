@@ -221,14 +221,14 @@ Current Status: Online. Titan Systems Nominal.
 Active Protocol: ${sentimentProtocol}
 ${sentimentInstruction}`;
 
-        if (quantumMode) {
+        if (quantumMode === true) {
             finalSystemPrompt += `\n\n[QUANTUM CORE ENABLED]
 >>> ACTIVATING CHAIN-OF-THOUGHT PROTOCOLS
 >>> ALLOYING LOGIC GATES
 >>> OUTPUT MUST BE DERIVED STEP-BY-STEP. SHOW YOUR WORK.`;
         }
 
-        if (creativeMode) {
+        if (creativeMode === true) {
             finalSystemPrompt += `\n\n[CREATIVE SYNTHESIS ENABLED]
 >>> DISENGAGING STANDARD FILTERS
 >>> PRIORITIZE NOVELTY AND AESTHETICS OVER EFFICIENCY
