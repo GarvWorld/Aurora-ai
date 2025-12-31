@@ -510,6 +510,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // Render AI Message
             addMessageToChat('ai', data.reply);
 
+            // Try to Render Code in Holo-Deck
+            renderHoloCode(data.reply);
+
             if (chatHistory.length > MAX_HISTORY) {
                 chatHistory = chatHistory.slice(-MAX_HISTORY);
             }
@@ -518,6 +521,29 @@ document.addEventListener('DOMContentLoaded', () => {
             speakText(data.reply);
 
         } catch (err) {
+            // --- SELF-REPAIR PROTOCOL (Auto-Retry) ---
+            if (!this.retryAttempted) {
+                console.warn("Error detected. Initiating Self-Repair...");
+                this.retryAttempted = true;
+
+                if (chatWindow) {
+                    const repairMsg = document.createElement('div');
+                    repairMsg.id = 'repair-status';
+                    repairMsg.style.color = '#ffd700'; // God gold
+                    repairMsg.style.fontSize = '0.8rem';
+                    repairMsg.innerHTML = '<ion-icon name="construct"></ion-icon> Anomaly detected. Rerouting neural pathways...';
+                    chatWindow.appendChild(repairMsg);
+                }
+
+                setTimeout(() => {
+                    const status = document.getElementById('repair-status');
+                    if (status) status.remove();
+                    sendMessage(); // Recursive retry
+                }, 1500);
+                return;
+            }
+            this.retryAttempted = false; // Reset for next valid interaction
+
             if (chatWindow) {
                 const errDiv = document.createElement('div');
                 errDiv.style.color = "#ff4444";
@@ -526,10 +552,80 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             console.error(err);
         } finally {
-            isProcessing = false;
-            sendBtn.style.opacity = "1";
-            sendBtn.style.cursor = "pointer";
-            if (chatWindow) chatWindow.scrollTop = chatWindow.scrollHeight;
+            if (!this.retryAttempted) { // Only reset UI if we aren't retrying
+                isProcessing = false;
+                sendBtn.style.opacity = "1";
+                sendBtn.style.cursor = "pointer";
+                if (chatWindow) chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+        }
+    }
+
+    // --- GOD MODE LOGIC ---
+    function checkGodMode() {
+        if (!quantumToggle || !creativeToggle) return;
+        const isGod = quantumToggle.checked && creativeToggle.checked;
+        if (isGod) {
+            document.body.classList.add('god-mode');
+            if (avatarOrb) {
+                avatarOrb.style.boxShadow = "0 0 30px #ffd700";
+                avatarOrb.style.background = "radial-gradient(circle, #ffd700, transparent)";
+            }
+        } else {
+            document.body.classList.remove('god-mode');
+            if (avatarOrb) {
+                avatarOrb.style.boxShadow = ""; // Reset to CSS default
+                avatarOrb.style.background = "";
+            }
+        }
+    }
+
+    if (quantumToggle) quantumToggle.onchange = checkGodMode;
+    if (creativeToggle) creativeToggle.onchange = checkGodMode;
+
+    // --- HOLO-DECK ENGINE ---
+    const holoDeck = getEl('holoDeck');
+    const holoFrame = getEl('holoFrame');
+
+    function renderHoloCode(text) {
+        if (!holoDeck || !holoFrame) return;
+
+        // Simple regex to find code blocks. 
+        // We look for specifically marked HTML or just standard ```html blocks
+        const htmlMatch = text.match(/```html([\s\S]*?)```/);
+        const cssMatch = text.match(/```css([\s\S]*?)```/);
+        const jsMatch = text.match(/```javascript([\s\S]*?)```/) || text.match(/```js([\s\S]*?)```/);
+
+        // If we found HTML, we assume it's an app/component worth rendering
+        if (htmlMatch) {
+            let html = htmlMatch[1];
+            let css = cssMatch ? cssMatch[1] : '';
+            let js = jsMatch ? jsMatch[1] : '';
+
+            // Construct full document
+            const fullDoc = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: sans-serif; padding: 20px; color: #333; }
+                        ${css}
+                    </style>
+                </head>
+                <body>
+                    ${html}
+                    <script>
+                        ${js}
+                    <\/script>
+                </body>
+                </html>
+            `;
+
+            // Inject
+            holoFrame.srcdoc = fullDoc;
+
+            // Show Deck
+            holoDeck.classList.add('active');
         }
     }
 
