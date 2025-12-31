@@ -165,6 +165,127 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => settingsModal.style.opacity = '1', 10);
     };
 
+    // --- Knowledge Base Logic (The Oracle) ---
+    const knowledgeBtn = document.getElementById('knowledgeBtn');
+    const knowledgeModal = document.getElementById('knowledgeModal');
+    const closeKnowledge = document.getElementById('closeKnowledge');
+    const ingestBtn = document.getElementById('ingestBtn');
+    const ingestUrl = document.getElementById('ingestUrl');
+    const ingestStatus = document.getElementById('ingestStatus');
+    const knowledgeList = document.getElementById('knowledgeList');
+
+    knowledgeBtn.onclick = () => {
+        knowledgeModal.style.display = 'flex';
+        setTimeout(() => knowledgeModal.style.opacity = '1', 10);
+        loadKnowledge(); // Load data when opening
+    };
+
+    function closeAllModals() {
+        settingsModal.style.opacity = '0';
+        knowledgeModal.style.opacity = '0';
+        setTimeout(() => {
+            settingsModal.style.display = 'none';
+            knowledgeModal.style.display = 'none';
+        }, 300);
+    }
+
+    closeSettings.onclick = closeAllModals;
+    closeKnowledge.onclick = closeAllModals;
+
+    // Close on click outside
+    window.onclick = (e) => {
+        if (e.target === settingsModal || e.target === knowledgeModal) closeAllModals();
+    };
+
+    // 1. Ingest Data
+    ingestBtn.onclick = async () => {
+        const url = ingestUrl.value.trim();
+        if (!url) return;
+
+        ingestBtn.disabled = true;
+        ingestBtn.innerHTML = '<ion-icon name="hourglass-outline"></ion-icon> Absorb...';
+        ingestStatus.textContent = "Connecting to Sensory Web...";
+        ingestStatus.style.color = "#4f8aff";
+
+        try {
+            const res = await fetch('/ingest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url })
+            });
+            const data = await res.json();
+
+            if (data.error) throw new Error(data.error);
+
+            ingestStatus.textContent = "Success! Data integrated.";
+            ingestStatus.style.color = "#00ff88";
+            ingestUrl.value = "";
+            loadKnowledge(); // Refresh list
+        } catch (err) {
+            ingestStatus.textContent = "Error: " + err.message;
+            ingestStatus.style.color = "#ff4444";
+        } finally {
+            ingestBtn.disabled = false;
+            ingestBtn.innerHTML = '<ion-icon name="cloud-download-outline"></ion-icon> Absorb';
+        }
+    };
+
+    // 2. Load & Render Knowledge (The Oracle View)
+    async function loadKnowledge() {
+        try {
+            const res = await fetch('/knowledge');
+            const sourceList = await res.json();
+
+            if (sourceList.length === 0) {
+                knowledgeList.innerHTML = '<div style="text-align:center; color:#555; font-size:0.8rem; padding: 20px;">Knowledge Base Empty</div>';
+                return;
+            }
+
+            knowledgeList.innerHTML = sourceList.map(src => `
+                <div class="knowledge-item ${src.verified ? 'verified' : ''}" style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; border-left: 3px solid ${src.verified ? '#00ff88' : '#555'};">
+                    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:5px;">
+                        <a href="${src.url}" target="_blank" style="color: #4f8aff; font-size: 0.75rem; text-decoration: none; word-break: break-all;">${src.url}</a>
+                        <div style="display:flex; gap:5px;">
+                            <button onclick="window.verifySource('${src.id}', ${!src.verified})" style="background:none; border:none; color:${src.verified ? '#00ff88' : '#555'}; cursor:pointer; font-size:1.1rem;" title="${src.verified ? 'Unverify' : 'Verify'}">
+                                <ion-icon name="checkmark-circle"></ion-icon>
+                            </button>
+                            <button onclick="window.deleteSource('${src.id}')" style="background:none; border:none; color:#ff4444; cursor:pointer; font-size:1.1rem;" title="Delete">
+                                <ion-icon name="trash"></ion-icon>
+                            </button>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.7rem; color: #aaa; max-height: 40px; overflow: hidden; text-overflow: ellipsis;">
+                        ${src.content.substring(0, 150)}...
+                    </div>
+                </div>
+            `).join('');
+
+        } catch (err) {
+            console.error("Failed to load knowledge", err);
+        }
+    }
+
+    // Global Oracle Functions
+    window.verifySource = async (id, verified) => {
+        await fetch('/knowledge/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, verified })
+        });
+        loadKnowledge();
+    };
+
+    window.deleteSource = async (id) => {
+        if (!confirm("Are you sure you want to purge this data?")) return;
+        await fetch('/knowledge/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        });
+        loadKnowledge();
+    };
+
+
     function closeModal() {
         settingsModal.style.opacity = '0';
         setTimeout(() => settingsModal.style.display = 'none', 300);
@@ -184,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
         config.temperature = parseFloat(tempSlider.value);
         config.voiceOutputEnabled = voiceOutputToggle.checked;
         config.selectedVoice = voiceSelect.value;
-        closeModal();
+        closeAllModals();
     };
 
     // --- State ---
