@@ -9,7 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const previewArea = document.getElementById('previewArea');
     const previewImg = document.getElementById('previewImg');
     const removeImg = document.getElementById('removeImg');
-    const reasoningToggle = document.getElementById('reasoningToggle');
+    const quantumToggle = document.getElementById('quantumToggle');
+    const creativeToggle = document.getElementById('creativeToggle');
+    const learningStatus = document.getElementById('learningStatus');
 
     // Settings Elements
     const settingsBtn = document.getElementById('settingsBtn');
@@ -257,7 +259,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     history: chatHistory, // Send only previous messages, not current one
                     image_url: currentImage,
                     model: modelSelector.value,
-                    reasoningEnabled: reasoningToggle ? reasoningToggle.checked : false,
+                    quantumMode: quantumToggle ? quantumToggle.checked : false,
+                    creativeMode: creativeToggle ? creativeToggle.checked : false,
                     systemPrompt: config.systemPrompt,
                     temperature: config.temperature
                 })
@@ -287,6 +290,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Check if reply exists
             if (!data.reply) {
                 throw new Error('No response from AI. Please try again.');
+            }
+
+            // Visual Learning Feedback
+            if (learningStatus) {
+                learningStatus.style.opacity = '1';
+                learningStatus.innerHTML = '<span style="width: 8px; height: 8px; background: #4f8aff; border-radius: 50%; box-shadow: 0 0 8px #4f8aff;"></span> ADAPTIVE MEMORY: UPDATING...';
+                setTimeout(() => {
+                    learningStatus.style.opacity = '0.5';
+                    learningStatus.innerHTML = '<span style="width: 8px; height: 8px; background: #4f8aff; border-radius: 50%;"></span> ADAPTIVE MEMORY: STANDBY';
+                }, 2000);
             }
 
             // 3. Render AI Response
