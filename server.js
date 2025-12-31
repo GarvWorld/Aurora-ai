@@ -148,8 +148,22 @@ app.post('/chat', async (req, res) => {
     try {
         const { message, history, image_url, model, quantumMode, creativeMode, systemPrompt, temperature } = req.body;
 
-        // 1. Load Long-Term Memory & VERIFIED SOURCES
+        // 1. Load Memory & XP
         const longTermMem = loadMemory();
+
+        // Update XP (Gamification)
+        const xpGain = 10;
+        longTermMem.userXP += xpGain;
+        const nextLevel = longTermMem.userLevel * 100;
+        let levelUp = false;
+        if (longTermMem.userXP >= nextLevel) {
+            longTermMem.userLevel++;
+            levelUp = true;
+        }
+        saveMemory(longTermMem);
+
+        // 2. Sentiment Analysis (Emotional Resonance)
+        const sentimentProtocol = message ? analyzeSentiment(message) : "NEUTRAL_PROTOCOL";
 
         let memoryContext = "";
 
@@ -168,7 +182,7 @@ app.post('/chat', async (req, res) => {
             memoryContext += "=== END KNOWLEDGE ===\n";
         }
 
-        // 2. Aurora Titan Personality System Prompt
+        // 3. Aurora Titan Personality System Prompt
         let basePrompt = systemPrompt || `You are Aurora Titan, a pinnacle of artificial intelligence engineering. You are not a reliable assistant; you are a strategic partner.
 
 ===CORE IDENTITY===
@@ -196,11 +210,16 @@ app.post('/chat', async (req, res) => {
 - Proactive: "Analysis complete.", "Optimizing output...", "Protocol engaged."
 `;
 
-
+        // Inject Sentiment Instruction
+        let sentimentInstruction = "";
+        if (sentimentProtocol === "EMPATHY_PROTOCOL") sentimentInstruction = "USER IS DISTRESSED. ENABLE EMPATHY MODULE. BE SUPPORTIVE.";
+        if (sentimentProtocol === "CELEBRATION_PROTOCOL") sentimentInstruction = "USER IS POSITIVE. REFLECT ENTHUSIASM.";
 
         let finalSystemPrompt = `${basePrompt}
 ${memoryContext}
-Current Status: Online. Titan Systems Nominal.`;
+Current Status: Online. Titan Systems Nominal.
+Active Protocol: ${sentimentProtocol}
+${sentimentInstruction}`;
 
         if (quantumMode) {
             finalSystemPrompt += `\n\n[QUANTUM CORE ENABLED]
@@ -235,7 +254,15 @@ Current Status: Online. Titan Systems Nominal.`;
         });
 
         const reply = completion.choices[0]?.message?.content || "No response.";
-        res.json({ reply: reply, memoryUpdated: false }); // We don't block response for learning
+
+        // Return Reply AND XP Stats
+        res.json({
+            reply: reply,
+            memoryUpdated: false,
+            xp: longTermMem.userXP,
+            level: longTermMem.userLevel,
+            levelUp: levelUp
+        });
 
         // 4. Trigger Learning (Fire and Forget)
         if (message && message.length > 10) {
