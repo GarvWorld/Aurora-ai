@@ -507,6 +507,9 @@ document.addEventListener('DOMContentLoaded', () => {
             chatHistory.push({ role: "user", content: userMessageContent });
             chatHistory.push({ role: "assistant", content: data.reply });
 
+            // Render AI Message
+            addMessageToChat('ai', data.reply);
+
             if (chatHistory.length > MAX_HISTORY) {
                 chatHistory = chatHistory.slice(-MAX_HISTORY);
             }
