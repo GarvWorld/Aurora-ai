@@ -9,6 +9,7 @@
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;500;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="god-mode.css">
     <!-- Ionicons for clean icons -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
 </head>
@@ -123,6 +124,29 @@
                         <ion-icon name="settings-outline" style="font-size: 1.1rem;"></ion-icon> Settings
                     </button>
                 </div>
+            </div>
+        </aside>
+
+        <!-- GOD MODE PARTICLES -->
+        <div class="god-particles"></div>
+
+        <!-- HOLO-DECK CONTAINER -->
+        <aside class="holo-deck" id="holoDeck">
+            <div class="holo-header">
+                <div class="holo-title">
+                    <span class="holo-status"></span> CREATION ENGINE
+                </div>
+                <button class="close-btn" onclick="document.getElementById('holoDeck').classList.remove('active')"
+                    style="font-size:1.2rem;">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
+            </div>
+            <iframe id="holoFrame" class="holo-iframe"></iframe>
+            <div class="holo-controls">
+                <button class="mono-btn secondary" style="font-size: 0.7rem; padding: 8px;"
+                    onclick="document.getElementById('holoDeck').classList.remove('active')">
+                    MINIMIZE
+                </button>
             </div>
         </aside>
 
