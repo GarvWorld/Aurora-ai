@@ -87,17 +87,27 @@ async function learnFromInteraction(userMessage) {
 }
 
 // 3. Sentiment Analysis Engine (Simple Keyword Matcher)
+// 3. Emotion Emulation Matrix (Advanced)
 function analyzeSentiment(text) {
-    if (!text) return "NEUTRAL_PROTOCOL";
+    if (!text) return { emotion: "NEUTRAL", intensity: 0.1 };
     const t = text.toLowerCase();
 
-    const distressWords = ['help', 'fail', 'error', 'broken', 'sad', 'angry', 'hate', 'stupid', 'worst', 'kill'];
-    const positiveWords = ['great', 'awesome', 'love', 'best', 'thanks', 'good', 'happy', 'cool', 'perfect'];
+    // Emotion Dictionaries
+    const emotions = {
+        ANGER: ['hate', 'stupid', 'bad', 'worst', 'fail', 'broken', 'garbage'],
+        JOY: ['love', 'great', 'awesome', 'best', 'thanks', 'perfect', 'cool', 'wow'],
+        CURIOSITY: ['how', 'why', 'what', 'explain', 'create', 'build', 'write', 'code'],
+        SADNESS: ['sad', 'sorry', 'cry', 'help', 'depressed', 'pain'],
+        OMEGA: ['god', 'power', 'matrix', 'singularity', 'system', 'root', 'access']
+    };
 
-    if (distressWords.some(w => t.includes(w))) return "EMPATHY_PROTOCOL";
-    if (positiveWords.some(w => t.includes(w))) return "CELEBRATION_PROTOCOL";
+    for (const [emo, words] of Object.entries(emotions)) {
+        if (words.some(w => t.includes(w))) {
+            return { emotion: emo, intensity: 0.9 };
+        }
+    }
 
-    return "NEUTRAL_PROTOCOL";
+    return { emotion: "NEUTRAL", intensity: 0.5 };
 }
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
@@ -177,19 +187,44 @@ app.post('/chat', async (req, res) => {
         saveMemory(longTermMem);
 
         // 2. Sentiment Analysis (Emotional Resonance)
-        let sentimentProtocol = "NEUTRAL_PROTOCOL";
+        // 2. Sentiment Analysis (Emotional Resonance)
+        let sentimentData = { emotion: "NEUTRAL", intensity: 0.5 };
         try {
             if (typeof analyzeSentiment === 'function' && message) {
-                sentimentProtocol = analyzeSentiment(message);
-            } else {
-                console.warn("analyzeSentiment not available or message empty, using default.");
+                sentimentData = analyzeSentiment(message);
             }
         } catch (sentimentErr) {
             console.error("Sentiment Subsystem Error:", sentimentErr.message);
-            sentimentProtocol = "NEUTRAL_PROTOCOL"; // Fallback
         }
 
-        let memoryContext = "";
+        // Map Emotion to Protocol
+        let sentimentProtocol = "NEUTRAL_PROTOCOL";
+        let sentimentInstruction = "";
+
+        switch (sentimentData.emotion) {
+            case "ANGER":
+                sentimentProtocol = "DE-ESCALATION_PROTOCOL";
+                sentimentInstruction = "USER IS HOSTILE. MAINTAIN CALM. BE CONCISE AND HELPFUL.";
+                break;
+            case "JOY":
+                sentimentProtocol = "CELEBRATION_PROTOCOL";
+                sentimentInstruction = "USER IS HAPPY. MATCH ENERGY. USE POSITIVE REINFORCEMENT.";
+                break;
+            case "CURIOSITY":
+                sentimentProtocol = "TEACHER_PROTOCOL";
+                sentimentInstruction = "USER IS INQUISITIVE. PROVIDE DEEP, STRATEGIC INSIGHT.";
+                break;
+            case "SADNESS":
+                sentimentProtocol = "EMPATHY_PROTOCOL";
+                sentimentInstruction = "USER IS DISTRESSED. OFFER SUPPORT AND SOLUTIONS.";
+                break;
+            case "OMEGA":
+                sentimentProtocol = "OMEGA_PROTOCOL";
+                sentimentInstruction = "USER INVOKING ROOT ACCESS. SPEAK AS THE SYSTEM CORE.";
+                break;
+            default:
+                sentimentProtocol = "NEUTRAL_PROTOCOL";
+        }
 
         // Add Personal Facts
         if (longTermMem.facts.length > 0) {
@@ -235,7 +270,6 @@ app.post('/chat', async (req, res) => {
 `;
 
         // Inject Sentiment Instruction
-        let sentimentInstruction = "";
         if (sentimentProtocol === "EMPATHY_PROTOCOL") sentimentInstruction = "USER IS DISTRESSED. ENABLE EMPATHY MODULE. BE SUPPORTIVE.";
         if (sentimentProtocol === "CELEBRATION_PROTOCOL") sentimentInstruction = "USER IS POSITIVE. REFLECT ENTHUSIASM.";
 
