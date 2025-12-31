@@ -35,6 +35,28 @@
                     </div>
                 </div>
 
+                <!-- XP SYSTEM & AVATAR -->
+                <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
+                    <!-- Dynamic Avatar (Holographic Orb) -->
+                    <div id="avatarOrb"
+                        style="width: 50px; height: 50px; border-radius: 50%; background: radial-gradient(circle, #4f8aff, transparent); box-shadow: 0 0 15px #4f8aff; transition: all 0.3s ease;">
+                    </div>
+
+                    <div style="flex: 1;">
+                        <div
+                            style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #ddd; margin-bottom: 5px;">
+                            <span>OPERATIVE LEVEL <span id="userLevel">1</span></span>
+                            <span id="xpText">0 XP</span>
+                        </div>
+                        <div
+                            style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
+                            <div id="xpBar"
+                                style="width: 0%; height: 100%; background: linear-gradient(90deg, #4f8aff, #b54eff); transition: width 0.5s ease;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="stat-label">CONFIGURATION</div>
 
                 <div class="status-panel"
@@ -52,16 +74,34 @@
                     </div>
                 </div>
 
+                <!-- Quantum Amplification -->
                 <div class="control-row"
-                    style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                    style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                     <span style="font-size: 0.85rem; color: #ddd;">Quantum Core (Deep Thought)</span>
                     <input type="checkbox" id="quantumToggle" style="accent-color: #b54eff; transform: scale(1.2);">
+                </div>
+                <!-- Depth Slider (Hidden unless Quantum is On - Logic handled in CSS/JS mainly, but simplified here) -->
+                <div class="setting-group" style="margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <label class="setting-label">Simulation Depth</label>
+                        <span id="depthVal" style="font-size: 0.7rem; color: #b54eff;">Standard</span>
+                    </div>
+                    <input type="range" id="depthSlider" class="styled-slider" min="1" max="3" value="1" step="1">
                 </div>
 
                 <div class="control-row"
                     style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
                     <span style="font-size: 0.85rem; color: #ddd;">Creative Synthesis</span>
                     <input type="checkbox" id="creativeToggle" style="accent-color: #ff4e88; transform: scale(1.2);">
+                </div>
+
+                <div class="setting-group" style="margin-bottom: 15px;">
+                    <label class="setting-label">AI Tone / Personality</label>
+                    <select id="toneSelector" class="mono-select">
+                        <option value="professional">Titan (Professional)</option>
+                        <option value="empathetic">Guardian (Empathetic)</option>
+                        <option value="witty">Trickster (Witty)</option>
+                    </select>
                 </div>
 
                 <select id="modelSelector" class="mono-select">
@@ -107,11 +147,14 @@
                     </div>
 
                     <div class="input-wrapper">
-                        <button id="voiceBtn" class="voice-btn" title="Voice Input">
+                        <button class="attach-btn" id="voiceBtn" title="Voice Command">
                             <ion-icon name="mic-outline"></ion-icon>
                         </button>
-                        <textarea id="userInput" placeholder="Message Aurora..." rows="1"></textarea>
-                        <button id="sendBtn" class="mono-btn primary">
+                        <button class="attach-btn" id="attachBtn">
+                            <ion-icon name="attach-outline"></ion-icon>
+                        </button>
+                        <textarea id="userInput" placeholder="Enter command or data stream..." rows="1"></textarea>
+                        <button id="sendBtn">
                             <ion-icon name="arrow-up-outline"></ion-icon>
                         </button>
                     </div>
