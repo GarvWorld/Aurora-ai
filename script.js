@@ -12,6 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const quantumToggle = document.getElementById('quantumToggle');
     const creativeToggle = document.getElementById('creativeToggle');
     const learningStatus = document.getElementById('learningStatus');
+    // New Refs handled in main block
+    const avatarOrb = document.getElementById('avatarOrb');
+    const xpBar = document.getElementById('xpBar');
+    const xpText = document.getElementById('xpText');
+    const userLevel = document.getElementById('userLevel');
+    const depthSlider = document.getElementById('depthSlider');
+    const toneSelector = document.getElementById('toneSelector');
+
 
     // Settings Elements
     const settingsBtn = document.getElementById('settingsBtn');
@@ -107,33 +115,38 @@ document.addEventListener('DOMContentLoaded', () => {
     // Voice Input Handler
     if (voiceBtn && recognition) {
         voiceBtn.onclick = () => {
-            if (isListening) {
-                recognition.stop();
-                isListening = false;
-                voiceBtn.classList.remove('listening');
-            } else {
-                recognition.start();
-                isListening = true;
-                voiceBtn.classList.add('listening');
+            if (isListening) recognition.stop();
+            else recognition.start();
+        };
+
+        recognition.onstart = () => {
+            isListening = true;
+            voiceBtn.classList.add('listening');
+            voiceBtn.style.color = '#ff4444';
+            if (avatarOrb) {
+                avatarOrb.style.boxShadow = '0 0 20px #ff4444';
+                avatarOrb.style.background = 'radial-gradient(circle, #ff4444, transparent)';
             }
-        };
-
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            userInput.value = transcript;
-            isListening = false;
-            voiceBtn.classList.remove('listening');
-        };
-
-        recognition.onerror = (event) => {
-            console.error('Speech recognition error:', event.error);
-            isListening = false;
-            voiceBtn.classList.remove('listening');
         };
 
         recognition.onend = () => {
             isListening = false;
             voiceBtn.classList.remove('listening');
+            voiceBtn.style.color = '';
+            if (avatarOrb) {
+                avatarOrb.style.boxShadow = '0 0 15px #4f8aff';
+                avatarOrb.style.background = 'radial-gradient(circle, #4f8aff, transparent)';
+            }
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            const current = userInput.value;
+            userInput.value = current ? current + ' ' + transcript : transcript;
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
         };
     }
 
@@ -337,6 +350,41 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Message Logic ---
+    // --- Slider Logic ---
+    if (depthSlider) {
+        depthSlider.oninput = (e) => {
+            const val = e.target.value;
+            const label = document.getElementById('depthVal');
+            if (label) {
+                if (val == 1) label.innerText = "Standard";
+                if (val == 2) label.innerText = "Deep";
+                if (val == 3) label.innerText = "Infinite";
+            }
+        };
+    }
+
+    function addMessageToChat(role, text) {
+        const div = document.createElement('div');
+        div.className = `msg ${role}-msg`;
+
+        // Mark as "Thinking" if AI
+        if (role === 'ai' || role === 'assistant') {
+            // Basic Markdown parsing
+            const formatted = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/### (.*?)\n/g, '<h3>$1</h3>')
+                .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+                .replace(/\n/g, '<br>');
+            div.innerHTML = formatted;
+        } else {
+            div.textContent = text;
+        }
+
+        chatWindow.appendChild(div);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    // --- Message Logic ---
     async function sendMessage() {
         const text = userInput.value.trim();
         if ((!text && !selectedImage) || isProcessing) return;
@@ -345,25 +393,21 @@ document.addEventListener('DOMContentLoaded', () => {
         sendBtn.style.opacity = "0.5";
         sendBtn.style.cursor = "not-allowed";
 
-        // 1. Render User Message immediately
-        const userDiv = document.createElement('div');
-        userDiv.className = 'msg user-msg';
+        // UI Updates
+        const currentText = text;
+        const currentImageCopy = selectedImage;
 
-        let visualContent = '';
-        if (selectedImage) {
-            visualContent = `<br><img src="${selectedImage}" style="max-height:150px; border:1px solid #333; margin-top:10px;">`;
+        // Render User Message
+        if (currentText) addMessageToChat('user', currentText);
+
+        if (currentImageCopy) {
+            const imgDiv = document.createElement('div');
+            imgDiv.className = 'msg user-msg';
+            imgDiv.innerHTML = `<img src="${currentImageCopy}" style="max-width:200px; border-radius:8px;">`;
+            chatWindow.appendChild(imgDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
-        userDiv.innerHTML = `<span class="label">OPERATOR</span>${text}${visualContent}`;
-        chatWindow.appendChild(userDiv);
-        chatWindow.scrollTop = chatWindow.scrollHeight;
-
-        // 2. Prepare Data for API
-        // Snapshot current inputs before clearing
-        const currentText = text;
-        const currentImage = selectedImage;
-
-        // Clear input state immediately (before API call)
         userInput.value = '';
         if (selectedImage) {
             selectedImage = null;
@@ -371,46 +415,50 @@ document.addEventListener('DOMContentLoaded', () => {
             previewArea.style.display = 'none';
         }
 
+        // Avatar State: THINKING
+        if (avatarOrb) avatarOrb.style.animation = "pulse-fast 0.5s infinite alternate";
+
         try {
-            const response = await fetch('/chat', {
+            const res = await fetch('/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message: currentText,
-                    history: chatHistory, // Send only previous messages, not current one
-                    image_url: currentImage,
+                    history: chatHistory,
+                    image_url: currentImageCopy,
                     model: modelSelector.value,
                     quantumMode: quantumToggle ? quantumToggle.checked : false,
                     creativeMode: creativeToggle ? creativeToggle.checked : false,
+                    simulationDepth: depthSlider ? depthSlider.value : 1,
+                    tone: toneSelector ? toneSelector.value : "professional",
                     systemPrompt: config.systemPrompt,
                     temperature: config.temperature
                 })
             });
 
-            if (!response.ok) {
-                // Try to parse error details from JSON response first
-                let errorMsg = `Server error: ${response.status} ${response.statusText}`;
-                try {
-                    const errorData = await response.json();
-                    if (errorData.error) {
-                        errorMsg = errorData.error;
-                    }
-                } catch (e) {
-                    // If parsing fails, stick to the generic message
+            const data = await res.json();
+
+            // Avatar State: IDLE
+            if (avatarOrb) avatarOrb.style.animation = "";
+
+            if (data.error) throw new Error(data.error);
+            if (!data.reply) throw new Error('No response from AI.');
+
+            // --- XP SYSTEM UPDATE ---
+            if (data.xp !== undefined && xpBar && xpText && userLevel) {
+                const xp = data.xp;
+                const lvl = data.level;
+                const nextLvlXp = lvl * 100;
+                const progress = ((xp - ((lvl - 1) * 100)) / (nextLvlXp - ((lvl - 1) * 100))) * 100;
+
+                xpBar.style.width = `${Math.min(progress, 100)}%`;
+                xpText.innerText = `${xp} XP`;
+                userLevel.innerText = lvl;
+
+                if (data.levelUp) {
+                    xpText.style.color = "#b54eff";
+                    setTimeout(() => xpText.style.color = "#ddd", 2000);
                 }
-                throw new Error(errorMsg);
-            }
-
-            const data = await response.json();
-
-            // Check for errors in response (logical errors)
-            if (data.error) {
-                throw new Error(data.error);
-            }
-
-            // Check if reply exists
-            if (!data.reply) {
-                throw new Error('No response from AI. Please try again.');
             }
 
             // Visual Learning Feedback
@@ -423,51 +471,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 2000);
             }
 
-            // 3. Render AI Response
-            const aiDiv = document.createElement('div');
-            aiDiv.className = 'msg ai-msg';
-
-            // Process reply with code block support
-            let processedReply = data.reply
-                // Handle code blocks with language identifier (```html, ```javascript, etc.)
-                .replace(/```(\w+)?\n?([\s\S]*?)```/g, (match, lang, code) => {
-                    const codeId = 'code-' + Math.random().toString(36).substr(2, 9);
-                    const language = lang || 'code';
-                    return `<div class="code-block-wrapper">
-                        <div class="code-header">
-                            <span class="code-lang">${language}</span>
-                            <button class="copy-btn" onclick="copyCode('${codeId}')">Copy</button>
-                        </div>
-                        <pre id="${codeId}"><code>${code.trim()}</code></pre>
-                    </div>`;
-                })
-                .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
-                .replace(/\n/g, '<br>')
-                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-
-            aiDiv.innerHTML = `<span class="label">TITAN</span>${processedReply}`;
-            chatWindow.appendChild(aiDiv);
-
             // Update Credits
             let credits = parseInt(creditCount.textContent.replace(',', ''));
             creditCount.textContent = (credits - 15).toLocaleString();
 
-            // 4. Update History with both user message and AI response
-            // Add user message to history (using proper content format)
+            // Update History
             let userMessageContent = [];
             if (currentText) userMessageContent.push({ type: "text", text: currentText });
-            if (currentImage) userMessageContent.push({ type: "image_url", image_url: { url: currentImage } });
+            if (currentImageCopy) userMessageContent.push({ type: "image_url", image_url: { url: currentImageCopy } });
+
             chatHistory.push({ role: "user", content: userMessageContent });
+            chatHistory.push({ role: "assistant", content: data.reply });
 
-            // Add AI response to history
-            chatHistory.push({ role: 'assistant', content: data.reply });
-
-            // Maintain history limit
             if (chatHistory.length > MAX_HISTORY) {
                 chatHistory = chatHistory.slice(-MAX_HISTORY);
             }
 
-            // 5. Speak response if voice output is enabled
+            // 5. Speak response
             speakText(data.reply);
 
         } catch (err) {
