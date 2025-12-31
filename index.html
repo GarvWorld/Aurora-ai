@@ -37,9 +37,31 @@
 
                 <div class="stat-label">CONFIGURATION</div>
 
-                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
-                    <span style="font-size: 0.85rem; color: #ddd;">Deep Reasoning</span>
-                    <input type="checkbox" id="reasoningToggle" style="accent-color: #4f8aff; transform: scale(1.2);">
+                <div class="status-panel"
+                    style="margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                    <div class="status-item"
+                        style="color: #00ff88; font-size: 0.75rem; display: flex; align-items: center; gap: 6px;">
+                        <span
+                            style="width: 8px; height: 8px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 5px #00ff88;"></span>
+                        SENSORIUM NETWORK: ONLINE
+                    </div>
+                    <div class="status-item" id="learningStatus"
+                        style="color: #4f8aff; font-size: 0.75rem; display: flex; align-items: center; gap: 6px; margin-top: 5px; opacity: 0.5;">
+                        <span style="width: 8px; height: 8px; background: #4f8aff; border-radius: 50%;"></span>
+                        ADAPTIVE MEMORY: STANDBY
+                    </div>
+                </div>
+
+                <div class="control-row"
+                    style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                    <span style="font-size: 0.85rem; color: #ddd;">Quantum Core (Deep Thought)</span>
+                    <input type="checkbox" id="quantumToggle" style="accent-color: #b54eff; transform: scale(1.2);">
+                </div>
+
+                <div class="control-row"
+                    style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                    <span style="font-size: 0.85rem; color: #ddd;">Creative Synthesis</span>
+                    <input type="checkbox" id="creativeToggle" style="accent-color: #ff4e88; transform: scale(1.2);">
                 </div>
 
                 <select id="modelSelector" class="mono-select">
