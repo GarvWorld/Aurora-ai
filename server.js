@@ -177,7 +177,17 @@ app.post('/chat', async (req, res) => {
         saveMemory(longTermMem);
 
         // 2. Sentiment Analysis (Emotional Resonance)
-        const sentimentProtocol = message ? analyzeSentiment(message) : "NEUTRAL_PROTOCOL";
+        let sentimentProtocol = "NEUTRAL_PROTOCOL";
+        try {
+            if (typeof analyzeSentiment === 'function' && message) {
+                sentimentProtocol = analyzeSentiment(message);
+            } else {
+                console.warn("analyzeSentiment not available or message empty, using default.");
+            }
+        } catch (sentimentErr) {
+            console.error("Sentiment Subsystem Error:", sentimentErr.message);
+            sentimentProtocol = "NEUTRAL_PROTOCOL"; // Fallback
+        }
 
         let memoryContext = "";
 
