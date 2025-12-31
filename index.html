@@ -64,37 +64,36 @@
 
         <!-- MAIN CHAT -->
         <main class="main-area">
-            <div id="chatMessages">
-                <!-- Welcome Message -->
-                <div class="msg ai-msg">
-                    <span class="label">JARVIS</span>
-                    Good evening, Sir. JARVIS online and at your service. How may I assist you today?
-                </div>
+            <!-- Welcome Message -->
+            <div class="msg ai-msg">
+                <span class="label">TITAN</span>
+                System online. Aurora Titan protocols initialized. Ready for input.
             </div>
+    </div>
 
-            <!-- Floating Input Pill -->
-            <div class="input-zone">
-                <div id="previewArea"
-                    style="display:none; position:absolute; top:-110px; left:0; background:#111; padding:5px; border-radius:8px; border:1px solid #333;">
-                    <img id="previewImg" style="height:100px; display:block; border-radius:4px;">
-                    <button id="removeImg"
-                        style="position:absolute; top:-8px; right:-8px; background:white; border:none; border-radius:50%; width:20px; height:20px; cursor:pointer;">×</button>
-                </div>
+    <!-- Floating Input Pill -->
+    <div class="input-zone">
+        <div id="previewArea"
+            style="display:none; position:absolute; top:-110px; left:0; background:#111; padding:5px; border-radius:8px; border:1px solid #333;">
+            <img id="previewImg" style="height:100px; display:block; border-radius:4px;">
+            <button id="removeImg"
+                style="position:absolute; top:-8px; right:-8px; background:white; border:none; border-radius:50%; width:20px; height:20px; cursor:pointer;">×</button>
+        </div>
 
-                <div class="input-wrapper">
-                    <button id="voiceBtn" class="voice-btn" title="Voice Input">
-                        <ion-icon name="mic-outline"></ion-icon>
-                    </button>
-                    <textarea id="userInput" placeholder="Message Aurora..." rows="1"></textarea>
-                    <button id="sendBtn" class="mono-btn primary">
-                        <ion-icon name="arrow-up-outline"></ion-icon>
-                    </button>
-                </div>
-                <div style="text-align: center; font-size: 0.7rem; color: #555; margin-top: 10px;">
-                    Aurora can make mistakes. Verify important information.
-                </div>
-            </div>
-        </main>
+        <div class="input-wrapper">
+            <button id="voiceBtn" class="voice-btn" title="Voice Input">
+                <ion-icon name="mic-outline"></ion-icon>
+            </button>
+            <textarea id="userInput" placeholder="Message Aurora..." rows="1"></textarea>
+            <button id="sendBtn" class="mono-btn primary">
+                <ion-icon name="arrow-up-outline"></ion-icon>
+            </button>
+        </div>
+        <div style="text-align: center; font-size: 0.7rem; color: #555; margin-top: 10px;">
+            Aurora can make mistakes. Verify important information.
+        </div>
+    </div>
+    </main>
     </div>
 
     <!-- SETTINGS MODAL -->
