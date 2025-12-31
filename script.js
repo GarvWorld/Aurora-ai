@@ -428,30 +428,33 @@ document.addEventListener('DOMContentLoaded', () => {
             if (previewArea) previewArea.style.display = 'none';
         }
 
-        // Avatar State: THINKING
-        if (avatarOrb) avatarOrb.style.animation = "pulse-fast 0.5s infinite alternate";
+        // Avatar State: LISTENING / THINKING based on input
+        if (avatarOrb) avatarOrb.style.animation = "pulse 1s infinite alternate";
+
+        // NEURAL ACTIVITY TRIGGER
+        if (typeof triggerNeuralActivity === 'function') triggerNeuralActivity();
+
+        // Safe parameter extraction with defaults
+        const safeModel = modelSelector ? modelSelector.value : "google/gemini-2.0-flash-001";
+        const safeQuantum = quantumToggle ? quantumToggle.checked : false;
+        const safeCreative = creativeToggle ? creativeToggle.checked : false;
+        const safeDepth = depthSlider ? depthSlider.value : 1;
+        const safeTone = toneSelector ? toneSelector.value : "professional";
+
+        const payload = {
+            message: currentText,
+            history: chatHistory,
+            image_url: currentImageCopy,
+            model: safeModel,
+            quantumMode: safeQuantum,
+            creativeMode: safeCreative,
+            simulationDepth: safeDepth,
+            tone: safeTone,
+            systemPrompt: config.systemPrompt,
+            temperature: config.temperature
+        };
 
         try {
-            // Safe parameter extraction with defaults
-            const safeModel = modelSelector ? modelSelector.value : "google/gemini-2.0-flash-001";
-            const safeQuantum = quantumToggle ? quantumToggle.checked : false;
-            const safeCreative = creativeToggle ? creativeToggle.checked : false;
-            const safeDepth = depthSlider ? depthSlider.value : 1;
-            const safeTone = toneSelector ? toneSelector.value : "professional";
-
-            const payload = {
-                message: currentText,
-                history: chatHistory,
-                image_url: currentImageCopy,
-                model: safeModel,
-                quantumMode: safeQuantum,
-                creativeMode: safeCreative,
-                simulationDepth: safeDepth,
-                tone: safeTone,
-                systemPrompt: config.systemPrompt,
-                temperature: config.temperature
-            };
-
             const res = await fetch('/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -538,6 +541,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     const status = document.getElementById('repair-status');
                     if (status) status.remove();
+                    this.retryAttempted = true;
                     sendMessage(); // Recursive retry
                 }, 1500);
                 return;
