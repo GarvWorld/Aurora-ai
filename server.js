@@ -86,6 +86,20 @@ async function learnFromInteraction(userMessage) {
     }
 }
 
+// 3. Sentiment Analysis Engine (Simple Keyword Matcher)
+function analyzeSentiment(text) {
+    if (!text) return "NEUTRAL_PROTOCOL";
+    const t = text.toLowerCase();
+
+    const distressWords = ['help', 'fail', 'error', 'broken', 'sad', 'angry', 'hate', 'stupid', 'worst', 'kill'];
+    const positiveWords = ['great', 'awesome', 'love', 'best', 'thanks', 'good', 'happy', 'cool', 'perfect'];
+
+    if (distressWords.some(w => t.includes(w))) return "EMPATHY_PROTOCOL";
+    if (positiveWords.some(w => t.includes(w))) return "CELEBRATION_PROTOCOL";
+
+    return "NEUTRAL_PROTOCOL";
+}
+
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 // --- KNOWLEDGE BASE ENDPOINTS ---
