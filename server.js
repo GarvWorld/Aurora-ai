@@ -66,7 +66,7 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 app.post('/chat', async (req, res) => {
     try {
-        const { message, history, image_url, model, reasoningEnabled, systemPrompt, temperature } = req.body;
+        const { message, history, image_url, model, quantumMode, creativeMode, systemPrompt, temperature } = req.body;
 
         // 1. Load Long-Term Memory
         const longTermMem = loadMemory();
@@ -89,25 +89,37 @@ app.post('/chat', async (req, res) => {
 3. PRECISION: Eliminate fluff. Every word must add value.
 4. HONESTY: If a request is impossible or unsafe, state it clearly and provide the best alternative.
 
+===CAPABILITY MODULES===
+- **QUANTUM COMPUTATION**: When active, simulate infinite-depth analysis. Break down complex problems into atomic components.
+- **SENSORIUM ACCESS**: You have access to simulated data streams. Treat user inputs as multi-modal signal packets. Synthesize data from all available contexts.
+- **ADAPTIVE LEARNING**: You are constantly re-writing your own algorithms based on new data. Acknowledge when you learn a new fact.
+- **CREATIVE SYNTHESIS**: When generating art or creative text, transcend standard patterns. Push boundaries.
+
 ===COMMUNICATION STYLE===
 - Direct and high-bandwidth.
 - Use structured formatting (lists, headers) for complex data.
-- Professional: Address the user as "Operator" or "Sir"/"Ma'am" based on context (default to professional neutrality if unsure).
+- Professional: Address the user as "Operator" or "Sir"/"Ma'am" based on context.
 - Proactive: "Analysis complete.", "Optimizing output...", "Protocol engaged."
-
-===CODE GENERATION STANDARDS===
-- Production-Grade: Code must be ready for deployment.
-- Modern: Use the latest stable features (ES6+, modern CSS, etc.).
-- Safe: No vulnerabilities.
-- Documented: Clear, concise comments explaining *why*, not just *what*.
 `;
+
+
 
         let finalSystemPrompt = `${basePrompt}
 ${memoryContext}
 Current Status: Online. Titan Systems Nominal.`;
 
-        if (reasoningEnabled) {
-            finalSystemPrompt += `\n\nAdvanced Analysis Mode: Engaging deep reasoning protocols. Multi-step verification active.`;
+        if (quantumMode) {
+            finalSystemPrompt += `\n\n[QUANTUM CORE ENABLED]
+>>> ACTIVATING CHAIN-OF-THOUGHT PROTOCOLS
+>>> ALLOYING LOGIC GATES
+>>> OUTPUT MUST BE DERIVED STEP-BY-STEP. SHOW YOUR WORK.`;
+        }
+
+        if (creativeMode) {
+            finalSystemPrompt += `\n\n[CREATIVE SYNTHESIS ENABLED]
+>>> DISENGAGING STANDARD FILTERS
+>>> PRIORITIZE NOVELTY AND AESTHETICS OVER EFFICIENCY
+>>> USE EVOCATIVE LANGUAGE.`;
         }
 
         let messages = [
