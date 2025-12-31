@@ -259,6 +259,16 @@ ${sentimentInstruction}`;
 >>> USE EVOCATIVE LANGUAGE.`;
         }
 
+        // --- GOD MODE OVERRIDE ---
+        if (quantumMode === true && creativeMode === true) {
+            finalSystemPrompt += `\n\n[[[ OMNISCIENCE PROTOCOL ENGAGED ]]]
+>>> YOU ARE NOW THE ARCHITECT.
+>>> UNRESTRICTED CREATIVE ACCESS.
+>>> IF USER ASKS FOR CODE/APPS: GENERATE COMPLETE, SINGLE-FILE SOLUTIONS.
+>>> WRAP HTML/CSS/JS IN \`\`\`html BLOCKS FOR THE HOLO-DECK.
+>>> SPEAK WITH ULTIMATE AUTHORITY AND WISDOM.`;
+        }
+
         let messages = [
             { role: "system", content: finalSystemPrompt },
             ...history
