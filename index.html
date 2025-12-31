@@ -10,6 +10,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="god-mode.css">
+    <link rel="stylesheet" href="sensorium.css">
     <!-- Ionicons for clean icons -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
 </head>
@@ -278,7 +279,25 @@
         </div>
     </div>
 
+    <!-- SCRIPTS -->
     <script src="script.js"></script>
+    <script src="sensorium.js"></script>
+
+    <!-- NEURAL CANVAS OVERLAY -->
+    <canvas id="neuralCanvas" class="neural-canvas"></canvas>
+
+    <!-- SENSORIUM PANEL (FOOTER) -->
+    <div class="sensorium-panel">
+        <div class="sensorium-label">
+            <div class="sensorium-status"></div>
+            SENSORIUM FEED
+        </div>
+        <div class="sensorium-feed">
+            <div class="sensorium-track" id="sensoriumTrack">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
