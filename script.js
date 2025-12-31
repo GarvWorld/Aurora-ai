@@ -1,38 +1,42 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const chatWindow = document.getElementById('chatMessages');
-    const userInput = document.getElementById('userInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const modelSelector = document.getElementById('modelSelector');
-    const creditCount = document.getElementById('creditCount');
-    const fileInput = document.getElementById('fileInput');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const previewArea = document.getElementById('previewArea');
-    const previewImg = document.getElementById('previewImg');
-    const removeImg = document.getElementById('removeImg');
-    const quantumToggle = document.getElementById('quantumToggle');
-    const creativeToggle = document.getElementById('creativeToggle');
-    const learningStatus = document.getElementById('learningStatus');
-    // New Refs handled in main block
-    const avatarOrb = document.getElementById('avatarOrb');
-    const xpBar = document.getElementById('xpBar');
-    const xpText = document.getElementById('xpText');
-    const userLevel = document.getElementById('userLevel');
-    const depthSlider = document.getElementById('depthSlider');
-    const toneSelector = document.getElementById('toneSelector');
+    // Helper to safely get element
+    const getEl = (id) => document.getElementById(id);
+
+    const chatWindow = getEl('chatMessages');
+    const userInput = getEl('userInput');
+    const sendBtn = getEl('sendBtn');
+    const modelSelector = getEl('modelSelector');
+    const creditCount = getEl('creditCount');
+    const fileInput = getEl('fileInput');
+    const uploadBtn = getEl('uploadBtn');
+    const previewArea = getEl('previewArea');
+    const previewImg = getEl('previewImg');
+    const removeImg = getEl('removeImg');
+    const quantumToggle = getEl('quantumToggle');
+    const creativeToggle = getEl('creativeToggle');
+    const learningStatus = getEl('learningStatus');
+
+    // New Refs
+    const avatarOrb = getEl('avatarOrb');
+    const xpBar = getEl('xpBar');
+    const xpText = getEl('xpText');
+    const userLevel = getEl('userLevel');
+    const depthSlider = getEl('depthSlider');
+    const toneSelector = getEl('toneSelector');
 
 
     // Settings Elements
-    const settingsBtn = document.getElementById('settingsBtn');
-    const settingsModal = document.getElementById('settingsModal');
-    const closeSettings = document.getElementById('closeSettings');
-    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
-    const sysPromptInput = document.getElementById('sysPromptInput');
-    const tempSlider = document.getElementById('tempSlider');
-    const tempValue = document.getElementById('tempValue');
-    const accentPicker = document.getElementById('accentPicker');
-    const voiceBtn = document.getElementById('voiceBtn');
-    const voiceOutputToggle = document.getElementById('voiceOutputToggle');
-    const voiceSelect = document.getElementById('voiceSelect');
+    const settingsBtn = getEl('settingsBtn');
+    const settingsModal = getEl('settingsModal');
+    const closeSettings = getEl('closeSettings');
+    const saveSettingsBtn = getEl('saveSettingsBtn');
+    const sysPromptInput = getEl('sysPromptInput');
+    const tempSlider = getEl('tempSlider');
+    const tempValue = getEl('tempValue');
+    const accentPicker = getEl('accentPicker');
+    const voiceBtn = getEl('voiceBtn');
+    const voiceOutputToggle = getEl('voiceOutputToggle');
+    const voiceSelect = getEl('voiceSelect');
 
     // Configuration State
     let config = {
@@ -60,55 +64,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load available voices
     function loadVoices() {
+        if (!speechSynthesis) return;
         voices = speechSynthesis.getVoices();
-        voiceSelect.innerHTML = '<option value="">Default</option>';
+        if (voiceSelect) {
+            voiceSelect.innerHTML = '<option value="">Default</option>';
 
-        // Filter English voices and categorize
-        const englishVoices = voices.filter(v => v.lang.startsWith('en'));
-        const femaleVoices = englishVoices.filter(v => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('woman'));
-        const maleVoices = englishVoices.filter(v => v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('man'));
-        const otherVoices = englishVoices.filter(v => !femaleVoices.includes(v) && !maleVoices.includes(v));
+            // Filter English voices and categorize
+            const englishVoices = voices.filter(v => v.lang.startsWith('en'));
+            const femaleVoices = englishVoices.filter(v => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('woman'));
+            const maleVoices = englishVoices.filter(v => v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('man'));
+            const otherVoices = englishVoices.filter(v => !femaleVoices.includes(v) && !maleVoices.includes(v));
 
-        if (femaleVoices.length > 0) {
-            const group = document.createElement('optgroup');
-            group.label = 'Female Voices';
-            femaleVoices.forEach(voice => {
-                const option = document.createElement('option');
-                option.value = voice.name;
-                option.textContent = voice.name;
-                group.appendChild(option);
-            });
-            voiceSelect.appendChild(group);
-        }
+            const addGroup = (label, voices) => {
+                if (voices.length === 0) return;
+                const group = document.createElement('optgroup');
+                group.label = label;
+                voices.forEach(voice => {
+                    const option = document.createElement('option');
+                    option.value = voice.name;
+                    option.textContent = voice.name;
+                    group.appendChild(option);
+                });
+                voiceSelect.appendChild(group);
+            };
 
-        if (maleVoices.length > 0) {
-            const group = document.createElement('optgroup');
-            group.label = 'Male Voices';
-            maleVoices.forEach(voice => {
-                const option = document.createElement('option');
-                option.value = voice.name;
-                option.textContent = voice.name;
-                group.appendChild(option);
-            });
-            voiceSelect.appendChild(group);
-        }
-
-        if (otherVoices.length > 0) {
-            const group = document.createElement('optgroup');
-            group.label = 'Other Voices';
-            otherVoices.forEach(voice => {
-                const option = document.createElement('option');
-                option.value = voice.name;
-                option.textContent = voice.name;
-                group.appendChild(option);
-            });
-            voiceSelect.appendChild(group);
+            addGroup('Female Voices', femaleVoices);
+            addGroup('Male Voices', maleVoices);
+            addGroup('Other Voices', otherVoices);
         }
     }
 
     // Load voices on page load and when they change
     loadVoices();
-    if (speechSynthesis.onvoiceschanged !== undefined) {
+    if (speechSynthesis && speechSynthesis.onvoiceschanged !== undefined) {
         speechSynthesis.onvoiceschanged = loadVoices;
     }
 
@@ -141,8 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript;
-            const current = userInput.value;
-            userInput.value = current ? current + ' ' + transcript : transcript;
+            if (userInput) {
+                const current = userInput.value;
+                userInput.value = current ? current + ' ' + transcript : transcript;
+            }
         };
 
         recognition.onerror = (event) => {
@@ -152,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Text-to-Speech Function
     function speakText(text) {
-        if (!config.voiceOutputEnabled) return;
+        if (!config.voiceOutputEnabled || !speechSynthesis) return;
 
         // Stop any ongoing speech
         speechSynthesis.cancel();
@@ -173,37 +163,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Settings Logic ---
-    settingsBtn.onclick = () => {
-        settingsModal.style.display = 'flex';
-        setTimeout(() => settingsModal.style.opacity = '1', 10);
-    };
-
-    // --- Knowledge Base Logic (The Oracle) ---
-    const knowledgeBtn = document.getElementById('knowledgeBtn');
-    const knowledgeModal = document.getElementById('knowledgeModal');
-    const closeKnowledge = document.getElementById('closeKnowledge');
-    const ingestBtn = document.getElementById('ingestBtn');
-    const ingestUrl = document.getElementById('ingestUrl');
-    const ingestStatus = document.getElementById('ingestStatus');
-    const knowledgeList = document.getElementById('knowledgeList');
-
-    knowledgeBtn.onclick = () => {
-        knowledgeModal.style.display = 'flex';
-        setTimeout(() => knowledgeModal.style.opacity = '1', 10);
-        loadKnowledge(); // Load data when opening
-    };
-
-    function closeAllModals() {
-        settingsModal.style.opacity = '0';
-        knowledgeModal.style.opacity = '0';
-        setTimeout(() => {
-            settingsModal.style.display = 'none';
-            knowledgeModal.style.display = 'none';
-        }, 300);
+    if (settingsBtn && settingsModal) {
+        settingsBtn.onclick = () => {
+            settingsModal.style.display = 'flex';
+            setTimeout(() => settingsModal.style.opacity = '1', 10);
+        };
     }
 
-    closeSettings.onclick = closeAllModals;
-    closeKnowledge.onclick = closeAllModals;
+    // --- Knowledge Base Logic (The Oracle) ---
+    const knowledgeBtn = getEl('knowledgeBtn');
+    const knowledgeModal = getEl('knowledgeModal');
+    const closeKnowledge = getEl('closeKnowledge');
+    const ingestBtn = getEl('ingestBtn');
+    const ingestUrl = getEl('ingestUrl');
+    const ingestStatus = getEl('ingestStatus');
+    const knowledgeList = getEl('knowledgeList');
+
+    if (knowledgeBtn && knowledgeModal) {
+        knowledgeBtn.onclick = () => {
+            knowledgeModal.style.display = 'flex';
+            setTimeout(() => knowledgeModal.style.opacity = '1', 10);
+            loadKnowledge(); // Load data when opening
+        };
+    }
+
+    function closeAllModals() {
+        if (settingsModal) {
+            settingsModal.style.opacity = '0';
+            setTimeout(() => settingsModal.style.display = 'none', 300);
+        }
+        if (knowledgeModal) {
+            knowledgeModal.style.opacity = '0';
+            setTimeout(() => knowledgeModal.style.display = 'none', 300);
+        }
+    }
+
+    if (closeSettings) closeSettings.onclick = closeAllModals;
+    if (closeKnowledge) closeKnowledge.onclick = closeAllModals;
 
     // Close on click outside
     window.onclick = (e) => {
@@ -211,45 +207,55 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // 1. Ingest Data
-    ingestBtn.onclick = async () => {
-        const url = ingestUrl.value.trim();
-        if (!url) return;
+    if (ingestBtn) {
+        ingestBtn.onclick = async () => {
+            if (!ingestUrl) return;
+            const url = ingestUrl.value.trim();
+            if (!url) return;
 
-        ingestBtn.disabled = true;
-        ingestBtn.innerHTML = '<ion-icon name="hourglass-outline"></ion-icon> Absorb...';
-        ingestStatus.textContent = "Connecting to Sensory Web...";
-        ingestStatus.style.color = "#4f8aff";
+            ingestBtn.disabled = true;
+            ingestBtn.innerHTML = '<ion-icon name="hourglass-outline"></ion-icon> Absorb...';
+            if (ingestStatus) {
+                ingestStatus.textContent = "Connecting to Sensory Web...";
+                ingestStatus.style.color = "#4f8aff";
+            }
 
-        try {
-            const res = await fetch('/ingest', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url })
-            });
-            const data = await res.json();
+            try {
+                const res = await fetch('/ingest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                const data = await res.json();
 
-            if (data.error) throw new Error(data.error);
+                if (data.error) throw new Error(data.error);
 
-            ingestStatus.textContent = "Success! Data integrated.";
-            ingestStatus.style.color = "#00ff88";
-            ingestUrl.value = "";
-            loadKnowledge(); // Refresh list
-        } catch (err) {
-            ingestStatus.textContent = "Error: " + err.message;
-            ingestStatus.style.color = "#ff4444";
-        } finally {
-            ingestBtn.disabled = false;
-            ingestBtn.innerHTML = '<ion-icon name="cloud-download-outline"></ion-icon> Absorb';
-        }
-    };
+                if (ingestStatus) {
+                    ingestStatus.textContent = "Success! Data integrated.";
+                    ingestStatus.style.color = "#00ff88";
+                }
+                ingestUrl.value = "";
+                loadKnowledge(); // Refresh list
+            } catch (err) {
+                if (ingestStatus) {
+                    ingestStatus.textContent = "Error: " + err.message;
+                    ingestStatus.style.color = "#ff4444";
+                }
+            } finally {
+                ingestBtn.disabled = false;
+                ingestBtn.innerHTML = '<ion-icon name="cloud-download-outline"></ion-icon> Absorb';
+            }
+        };
+    }
 
     // 2. Load & Render Knowledge (The Oracle View)
     async function loadKnowledge() {
+        if (!knowledgeList) return;
         try {
             const res = await fetch('/knowledge');
             const sourceList = await res.json();
 
-            if (sourceList.length === 0) {
+            if (!Array.isArray(sourceList) || sourceList.length === 0) {
                 knowledgeList.innerHTML = '<div style="text-align:center; color:#555; font-size:0.8rem; padding: 20px;">Knowledge Base Empty</div>';
                 return;
             }
@@ -275,51 +281,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (err) {
             console.error("Failed to load knowledge", err);
+            knowledgeList.innerHTML = '<div style="text-align:center; color:#ff4444; font-size:0.8rem;">Connection Error</div>';
         }
     }
 
     // Global Oracle Functions
     window.verifySource = async (id, verified) => {
-        await fetch('/knowledge/verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, verified })
-        });
-        loadKnowledge();
+        try {
+            await fetch('/knowledge/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, verified })
+            });
+            loadKnowledge();
+        } catch (e) { console.error(e); }
     };
 
     window.deleteSource = async (id) => {
         if (!confirm("Are you sure you want to purge this data?")) return;
-        await fetch('/knowledge/delete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id })
-        });
-        loadKnowledge();
+        try {
+            await fetch('/knowledge/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            loadKnowledge();
+        } catch (e) { console.error(e); }
     };
-
-
-    function closeModal() {
-        settingsModal.style.opacity = '0';
-        setTimeout(() => settingsModal.style.display = 'none', 300);
-    }
-    closeSettings.onclick = closeModal;
-    settingsModal.onclick = (e) => { if (e.target === settingsModal) closeModal(); };
 
     // Real-time Visual Updates
-    tempSlider.oninput = (e) => tempValue.textContent = e.target.value;
+    if (tempSlider && tempValue) {
+        tempSlider.oninput = (e) => tempValue.textContent = e.target.value;
+    }
 
-    accentPicker.oninput = (e) => {
-        document.documentElement.style.setProperty('--accent-color', e.target.value);
-    };
+    if (accentPicker) {
+        accentPicker.oninput = (e) => {
+            document.documentElement.style.setProperty('--accent-color', e.target.value);
+        };
+    }
 
-    saveSettingsBtn.onclick = () => {
-        config.systemPrompt = sysPromptInput.value.trim();
-        config.temperature = parseFloat(tempSlider.value);
-        config.voiceOutputEnabled = voiceOutputToggle.checked;
-        config.selectedVoice = voiceSelect.value;
-        closeAllModals();
-    };
+    if (saveSettingsBtn) {
+        saveSettingsBtn.onclick = () => {
+            if (sysPromptInput) config.systemPrompt = sysPromptInput.value.trim();
+            if (tempSlider) config.temperature = parseFloat(tempSlider.value);
+            if (voiceOutputToggle) config.voiceOutputEnabled = voiceOutputToggle.checked;
+            if (voiceSelect) config.selectedVoice = voiceSelect.value;
+            closeAllModals();
+        };
+    }
 
     // --- State ---
     let chatHistory = [];
@@ -328,28 +337,30 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedImage = null;
 
     // --- File Handling ---
-    uploadBtn.onclick = () => fileInput.click();
+    if (uploadBtn && fileInput) {
+        uploadBtn.onclick = () => fileInput.click();
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    selectedImage = event.target.result;
+                    if (previewImg) previewImg.src = selectedImage;
+                    if (previewArea) previewArea.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+    }
 
-    fileInput.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                selectedImage = event.target.result;
-                previewImg.src = selectedImage;
-                previewArea.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+    if (removeImg) {
+        removeImg.onclick = () => {
+            selectedImage = null;
+            if (fileInput) fileInput.value = '';
+            if (previewArea) previewArea.style.display = 'none';
+        };
+    }
 
-    removeImg.onclick = () => {
-        selectedImage = null;
-        fileInput.value = '';
-        previewArea.style.display = 'none';
-    };
-
-    // --- Message Logic ---
     // --- Slider Logic ---
     if (depthSlider) {
         depthSlider.oninput = (e) => {
@@ -364,6 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function addMessageToChat(role, text) {
+        if (!chatWindow) return;
         const div = document.createElement('div');
         div.className = `msg ${role}-msg`;
 
@@ -386,6 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Message Logic ---
     async function sendMessage() {
+        if (!userInput || !sendBtn) return;
         const text = userInput.value.trim();
         if ((!text && !selectedImage) || isProcessing) return;
 
@@ -400,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Render User Message
         if (currentText) addMessageToChat('user', currentText);
 
-        if (currentImageCopy) {
+        if (currentImageCopy && chatWindow) {
             const imgDiv = document.createElement('div');
             imgDiv.className = 'msg user-msg';
             imgDiv.innerHTML = `<img src="${currentImageCopy}" style="max-width:200px; border-radius:8px;">`;
@@ -411,29 +424,38 @@ document.addEventListener('DOMContentLoaded', () => {
         userInput.value = '';
         if (selectedImage) {
             selectedImage = null;
-            fileInput.value = '';
-            previewArea.style.display = 'none';
+            if (fileInput) fileInput.value = '';
+            if (previewArea) previewArea.style.display = 'none';
         }
 
         // Avatar State: THINKING
         if (avatarOrb) avatarOrb.style.animation = "pulse-fast 0.5s infinite alternate";
 
         try {
+            // Safe parameter extraction with defaults
+            const safeModel = modelSelector ? modelSelector.value : "google/gemini-2.0-flash-001";
+            const safeQuantum = quantumToggle ? quantumToggle.checked : false;
+            const safeCreative = creativeToggle ? creativeToggle.checked : false;
+            const safeDepth = depthSlider ? depthSlider.value : 1;
+            const safeTone = toneSelector ? toneSelector.value : "professional";
+
+            const payload = {
+                message: currentText,
+                history: chatHistory,
+                image_url: currentImageCopy,
+                model: safeModel,
+                quantumMode: safeQuantum,
+                creativeMode: safeCreative,
+                simulationDepth: safeDepth,
+                tone: safeTone,
+                systemPrompt: config.systemPrompt,
+                temperature: config.temperature
+            };
+
             const res = await fetch('/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: currentText,
-                    history: chatHistory,
-                    image_url: currentImageCopy,
-                    model: modelSelector.value,
-                    quantumMode: quantumToggle ? quantumToggle.checked : false,
-                    creativeMode: creativeToggle ? creativeToggle.checked : false,
-                    simulationDepth: depthSlider ? depthSlider.value : 1,
-                    tone: toneSelector ? toneSelector.value : "professional",
-                    systemPrompt: config.systemPrompt,
-                    temperature: config.temperature
-                })
+                body: JSON.stringify(payload)
             });
 
             const data = await res.json();
@@ -472,8 +494,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Update Credits
-            let credits = parseInt(creditCount.textContent.replace(',', ''));
-            creditCount.textContent = (credits - 15).toLocaleString();
+            if (creditCount) {
+                let credits = parseInt(creditCount.textContent.replace(',', '')) || 0;
+                creditCount.textContent = (credits - 15).toLocaleString();
+            }
 
             // Update History
             let userMessageContent = [];
@@ -491,25 +515,30 @@ document.addEventListener('DOMContentLoaded', () => {
             speakText(data.reply);
 
         } catch (err) {
-            const errDiv = document.createElement('div');
-            errDiv.style.color = "#ff4444";
-            errDiv.innerHTML = `<span class="label">SYSTEM ALERT</span>Connection Severed. details: ${err.message}`;
-            chatWindow.appendChild(errDiv);
+            if (chatWindow) {
+                const errDiv = document.createElement('div');
+                errDiv.style.color = "#ff4444";
+                errDiv.innerHTML = `<span class="label">SYSTEM ALERT</span>Connection Severed. details: ${err.message}`;
+                chatWindow.appendChild(errDiv);
+            }
+            console.error(err);
         } finally {
             isProcessing = false;
             sendBtn.style.opacity = "1";
             sendBtn.style.cursor = "pointer";
-            chatWindow.scrollTop = chatWindow.scrollHeight;
+            if (chatWindow) chatWindow.scrollTop = chatWindow.scrollHeight;
         }
     }
 
-    sendBtn.onclick = sendMessage;
-    userInput.onkeydown = (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
-    };
+    if (sendBtn) sendBtn.onclick = sendMessage;
+    if (userInput) {
+        userInput.onkeydown = (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        };
+    }
 });
 
 // Global copy function for code blocks
