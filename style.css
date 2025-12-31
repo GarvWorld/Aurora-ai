@@ -198,6 +198,8 @@ h1.brand-title::before {
     display: flex;
     flex-direction: column;
     position: relative;
+    align-items: center;
+    /* Center children horizontally */
 }
 
 #chatMessages {
@@ -208,13 +210,30 @@ h1.brand-title::before {
     /* Space for floating input */
     display: flex;
     flex-direction: column;
-    gap: 40px;
-    /* More breathable */
+    gap: 30px;
     scroll-behavior: smooth;
-    max-width: 1000px;
-    /* Wider reading area */
-    margin: 0 auto;
+    max-width: 1100px;
+    /* Match input zone width */
     width: 100%;
+    margin: 0 auto;
+}
+
+/* Custom Scrollbar for Chat */
+#chatMessages::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chatMessages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#chatMessages::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+#chatMessages::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 /* --- MESSAGES --- */
@@ -223,6 +242,9 @@ h1.brand-title::before {
     font-size: 1rem;
     animation: slideUp 0.3s ease-out;
     padding: 0 10px;
+    max-width: 85%;
+    /* Prevent messages from being too wide */
+    position: relative;
 }
 
 .label {
@@ -231,21 +253,35 @@ h1.brand-title::before {
     margin-bottom: 6px;
     display: block;
     color: var(--text-secondary);
+    letter-spacing: 0.5px;
 }
 
 .user-msg {
     align-self: flex-end;
     background: linear-gradient(135deg, rgba(79, 138, 255, 0.08), rgba(79, 138, 255, 0.04));
-    padding: 16px 22px;
+    padding: 16px 24px;
     border-radius: var(--radius-lg) var(--radius-lg) 4px var(--radius-lg);
     border: 1px solid rgba(79, 138, 255, 0.15);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease;
+    text-align: left;
+    /* Ensure text inside is left aligned */
 }
 
 .user-msg:hover {
     border-color: rgba(79, 138, 255, 0.25);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.ai-msg {
+    align-self: flex-start;
+    padding: 10px 0;
+    /* Less padding for AI to feel cleaner */
+    animation: fadeInSlide 0.4s ease-out;
+    width: 100%;
+    /* Take full width container allows max-width:85% effective */
+    max-width: 90%;
+    /* Allow AI a bit more room */
 }
 
 /* Hide label for cleaner look */
@@ -354,8 +390,10 @@ h1.brand-title::before {
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-    width: 90%;
-    max-width: 800px;
+    width: 95%;
+    /* Responsive width */
+    max-width: 1100px;
+    /* Match chat messages width */
     z-index: 20;
 }
 
