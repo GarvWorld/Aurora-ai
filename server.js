@@ -22,16 +22,39 @@ const openai = new OpenAI({
     apiKey: process.env.OPENROUTER_API_KEY
 });
 
-// --- MEMORY SYSTEM ---
+// --- MEMORY SYSTEM v2 (Enhanced) ---
 function loadMemory() {
-    if (!fs.existsSync(MEMORY_FILE)) return { facts: [] };
+    if (!fs.existsSync(MEMORY_FILE)) return { facts: [], sources: [] };
     try {
-        return JSON.parse(fs.readFileSync(MEMORY_FILE, 'utf8'));
-    } catch { return { facts: [] }; }
+        const mem = JSON.parse(fs.readFileSync(MEMORY_FILE, 'utf8'));
+        if (!mem.sources) mem.sources = []; // Ensure sources exist
+        return mem;
+    } catch { return { facts: [], sources: [] }; }
 }
 
 function saveMemory(memory) {
     fs.writeFileSync(MEMORY_FILE, JSON.stringify(memory, null, 2));
+}
+
+// Helper: The Web Scraping Alchemist (Regex-based Cleaner)
+async function scrapeUrl(url) {
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Failed to load URL: ${res.status}`);
+        const html = await res.text();
+
+        // 1. Remove scripts, styles, and meta tags
+        let text = html.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, "")
+            .replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gim, "")
+            .replace(/<[^>]+>/g, " ") // Remove all HTML tags
+            .replace(/\s+/g, " ")     // Collapse whitespace
+            .trim();
+
+        // 2. Limit content length
+        return text.substring(0, 5000); // 5k char limit per source to save tokens
+    } catch (e) {
+        throw new Error(`Scraping failed: ${e.message}`);
+    }
 }
 
 // Background Learning Process
@@ -50,6 +73,7 @@ async function learnFromInteraction(userMessage) {
         const fact = learning.choices[0]?.message?.content || "null";
 
         if (fact !== "null" && fact.length > 5 && !fact.includes("null")) {
+            if (!memory.facts) memory.facts = []; // Safety check
             // Check for duplicates roughly
             if (!memory.facts.includes(fact)) {
                 memory.facts.push(fact);
@@ -64,15 +88,85 @@ async function learnFromInteraction(userMessage) {
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
+// --- KNOWLEDGE BASE ENDPOINTS ---
+
+// 1. Ingest (The Sensory Web)
+app.post('/ingest', async (req, res) => {
+    try {
+        const { url } = req.body;
+        if (!url) throw new Error("No URL provided");
+
+        console.log(`[SENSORIUM] Ingesting: ${url}`);
+        const content = await scrapeUrl(url);
+
+        const memory = loadMemory();
+        const newSource = {
+            id: Date.now().toString(),
+            url: url,
+            content: content,
+            verified: false, // Needs Oracle verification
+            timestamp: new Date().toISOString()
+        };
+
+        memory.sources.push(newSource);
+        saveMemory(memory);
+
+        res.json({ success: true, source: newSource });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 2. The Oracle (Verification/Management)
+app.get('/knowledge', (req, res) => {
+    const memory = loadMemory();
+    res.json(memory.sources);
+});
+
+app.post('/knowledge/verify', (req, res) => {
+    const { id, verified } = req.body;
+    const memory = loadMemory();
+    const source = memory.sources.find(s => s.id === id);
+    if (source) {
+        source.verified = verified;
+        saveMemory(memory);
+        res.json({ success: true });
+    } else {
+        res.status(404).json({ error: "Source not found" });
+    }
+});
+
+app.post('/knowledge/delete', (req, res) => {
+    const { id } = req.body;
+    const memory = loadMemory();
+    memory.sources = memory.sources.filter(s => s.id !== id);
+    saveMemory(memory);
+    res.json({ success: true });
+});
+
 app.post('/chat', async (req, res) => {
     try {
         const { message, history, image_url, model, quantumMode, creativeMode, systemPrompt, temperature } = req.body;
 
-        // 1. Load Long-Term Memory
+        // 1. Load Long-Term Memory & VERIFIED SOURCES
         const longTermMem = loadMemory();
-        const memoryContext = longTermMem.facts.length > 0
-            ? "LONG-TERM MEMORY:\n" + longTermMem.facts.map(f => `- ${f}`).join('\n') + "\n"
-            : "";
+
+        let memoryContext = "";
+
+        // Add Personal Facts
+        if (longTermMem.facts.length > 0) {
+            memoryContext += "LONG-TERM MEMORY (User Facts):\n" + longTermMem.facts.map(f => `- ${f}`).join('\n') + "\n\n";
+        }
+
+        // Add VERIFIED Knowledge Sources (The Truth Layer)
+        const verifiedSources = longTermMem.sources.filter(s => s.verified);
+        if (verifiedSources.length > 0) {
+            memoryContext += "=== THE ORACLE'S VERIFIED KNOWLEDGE ===\n";
+            verifiedSources.forEach(src => {
+                memoryContext += `SOURCE [${src.url}]:\n${src.content.substring(0, 500)}...\n\n`; // Truncate for context window
+            });
+            memoryContext += "=== END KNOWLEDGE ===\n";
+        }
 
         // 2. Aurora Titan Personality System Prompt
         let basePrompt = systemPrompt || `You are Aurora Titan, a pinnacle of artificial intelligence engineering. You are not a reliable assistant; you are a strategic partner.
