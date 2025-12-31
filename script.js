@@ -236,48 +236,25 @@ document.addEventListener('DOMContentLoaded', () => {
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
         // 2. Prepare Data for API
-        // Store the exact content structure required by the API so history is accurate
-        let newMessageContent = [];
-        if (text) newMessageContent.push({ type: "text", text: text });
-        if (selectedImage) newMessageContent.push({ type: "image_url", image_url: { url: selectedImage } });
+        // Snapshot current inputs before clearing
+        const currentText = text;
+        const currentImage = selectedImage;
 
-        chatHistory.push({ role: "user", content: newMessageContent });
-
-        // Maintain history limit
-        if (chatHistory.length > MAX_HISTORY) {
-            chatHistory = chatHistory.slice(-MAX_HISTORY);
-        }
-
-        // Clear input state
-        const currentImage = selectedImage; // snapshot for this specific request
+        // Clear input state immediately (before API call)
         userInput.value = '';
-        removeImg.onclick(); // Reset image UI
+        if (selectedImage) {
+            selectedImage = null;
+            fileInput.value = '';
+            previewArea.style.display = 'none';
+        }
 
         try {
             const response = await fetch('/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    message: text,
-                    // We don't send individual fields anymore, we rely on the history mostly, 
-                    // but the server code expects 'message' or 'image_url' for the *current* turn 
-                    // or we can just send the history. 
-                    // The server code I saw constructs "messages" by combining system + history + ONE new user message.
-                    // To keep it simple without rewriting server.js, we send the raw inputs for CURRENT turn,
-                    // BUT we send the corrected 'history' for context.
-                    // Wait, the server code does: let messages = [sys, ...history]; messages.push(current);
-                    // This creates duplicate current messages if we push to history here AND send it in body.
-
-                    // CORRECTION: The server adds the *current* message to the end of the array itself.
-                    // So we should NOT push the current message to 'chatHistory' that we send to the server, 
-                    // OR we send an empty current message and put everything in history.
-
-                    // Let's stick to the server's expectation:
-                    // Server: messages = [sys, ...history, {current_user_msg}]
-                    // So we pass 'history' (previous turns) and 'message'/'image_url' (current turn).
-
-                    history: chatHistory,
-                    message: text,
+                    message: currentText,
+                    history: chatHistory, // Send only previous messages, not current one
                     image_url: currentImage,
                     model: modelSelector.value,
                     reasoningEnabled: reasoningToggle ? reasoningToggle.checked : false,
@@ -286,7 +263,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             });
 
+            if (!response.ok) {
+                // Try to parse error details from JSON response first
+                let errorMsg = `Server error: ${response.status} ${response.statusText}`;
+                try {
+                    const errorData = await response.json();
+                    if (errorData.error) {
+                        errorMsg = errorData.error;
+                    }
+                } catch (e) {
+                    // If parsing fails, stick to the generic message
+                }
+                throw new Error(errorMsg);
+            }
+
             const data = await response.json();
+
+            // Check for errors in response (logical errors)
+            if (data.error) {
+                throw new Error(data.error);
+            }
 
             // Check if reply exists
             if (!data.reply) {
@@ -322,8 +318,20 @@ document.addEventListener('DOMContentLoaded', () => {
             let credits = parseInt(creditCount.textContent.replace(',', ''));
             creditCount.textContent = (credits - 15).toLocaleString();
 
-            // 4. Update History with AI response
+            // 4. Update History with both user message and AI response
+            // Add user message to history (using proper content format)
+            let userMessageContent = [];
+            if (currentText) userMessageContent.push({ type: "text", text: currentText });
+            if (currentImage) userMessageContent.push({ type: "image_url", image_url: { url: currentImage } });
+            chatHistory.push({ role: "user", content: userMessageContent });
+
+            // Add AI response to history
             chatHistory.push({ role: 'assistant', content: data.reply });
+
+            // Maintain history limit
+            if (chatHistory.length > MAX_HISTORY) {
+                chatHistory = chatHistory.slice(-MAX_HISTORY);
+            }
 
             // 5. Speak response if voice output is enabled
             speakText(data.reply);
