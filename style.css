@@ -61,6 +61,25 @@ body {
     flex-direction: column;
     gap: 25px;
     z-index: 10;
+    overflow-y: auto;
+    max-height: 100vh;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(79, 138, 255, 0.2);
+    border-radius: 2px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(79, 138, 255, 0.4);
 }
 
 h1.brand-title {
