@@ -158,13 +158,48 @@ Current Status: Online and ready to assist.`;
         }
 
     } catch (error) {
-        console.error("Server Error Details:", error);
+        console.error("=== SERVER ERROR ===");
+        console.error("Error Type:", error.constructor.name);
         console.error("Error Message:", error.message);
-        console.error("Stack:", error.stack);
-        res.status(500).json({ error: error.message });
+        console.error("Error Stack:", error.stack);
+
+        // Check if it's an API error
+        if (error.response) {
+            console.error("API Response Status:", error.response.status);
+            console.error("API Response Data:", error.response.data);
+        }
+
+        // Provide user-friendly error messages
+        let userMessage = error.message;
+
+        if (error.message.includes('API key')) {
+            userMessage = 'API Key Error: Please check your OpenRouter API key in the .env file';
+        } else if (error.message.includes('401')) {
+            userMessage = 'Authentication Failed: Invalid API key';
+        } else if (error.message.includes('429')) {
+            userMessage = 'Rate Limit Exceeded: Too many requests. Please wait a moment.';
+        } else if (error.message.includes('network') || error.message.includes('ENOTFOUND')) {
+            userMessage = 'Network Error: Cannot connect to OpenRouter API. Check your internet connection.';
+        } else if (error.code === 'ECONNREFUSED') {
+            userMessage = 'Connection Refused: Cannot reach the AI service.';
+        }
+
+        res.status(500).json({
+            error: userMessage,
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 });
 
+// Validate API Key on startup
+if (!process.env.OPENROUTER_API_KEY) {
+    console.error('⚠️  WARNING: OPENROUTER_API_KEY not found in environment variables!');
+    console.error('Please ensure your .env file exists and contains: OPENROUTER_API_KEY=your_key_here');
+} else {
+    console.log('✓ API Key loaded successfully');
+}
+
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`AURORA EVOLUTION LIVE | PORT ${PORT}`);
+    console.log(`Access at: http://localhost:${PORT}`);
 });
